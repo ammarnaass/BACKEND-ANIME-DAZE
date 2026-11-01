@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "../lib/prisma";
 import { sendSuccess, sendError } from "../lib/response";
 import { authMiddleware } from "../middleware/auth";
+import { resolveStreamUrl } from "../lib/resolvers";
 import rawEpisodes from "../data/episodes.json";
 
 export const episodesRoutes = new Hono();
@@ -126,6 +127,28 @@ episodesRoutes.get("/:id", async (c) => {
           ]
         : [];
 
+      const mappedStaticServers = staticServers.map((s: any) => {
+        const resolved = resolveStreamUrl(s.url, s.quality);
+        return {
+          id: s.id,
+          name: s.name || resolved.defaultName,
+          url: s.url,
+          directUrl: resolved.directUrl,
+          provider: resolved.provider,
+          category: resolved.category,
+          quality: s.quality || resolved.quality,
+          type: s.type || resolved.type,
+          priority: s.priority || 1,
+          isWorking: true,
+          lastCheckedAt: null,
+          latencyMs: null,
+          supportedQualities: s.supportedQualities || ["1080p", "720p", "480p", "Auto"],
+        };
+      });
+
+      const watchServers = mappedStaticServers.filter((s: any) => s.category === "streaming" || s.category === "both");
+      const downloadServers = mappedStaticServers.filter((s: any) => s.category === "download" || s.category === "both");
+
       return sendSuccess(c, {
         id: String(staticEp.id),
         animeId: staticEp.animeId || "slam-dunk",
@@ -148,27 +171,36 @@ episodesRoutes.get("/:id", async (c) => {
           title: "سلام دانك (Slam Dunk)",
           coverImage: "/hero-bg.jpg",
         },
-        servers: staticServers,
+        servers: mappedStaticServers,
+        watchServers,
+        downloadServers,
         comments: [],
         nextEpisode: null,
         prevEpisode: null,
       });
     }
 
-    // Format servers and fill in types and supported qualities
-    let formattedServers = episode.servers.map((s) => ({
-      id: s.id,
-      name: s.name,
-      url: s.url,
-      quality: s.quality || "1080p FHD",
-      type: detectServerType(s.url, s.type),
-      priority: s.priority,
-      isWorking: s.isWorking,
-      lastCheckedAt: s.lastCheckedAt,
-      supportedQualities: s.supportedQualities && s.supportedQualities.length > 0
-        ? s.supportedQualities
-        : ["1080p", "720p", "480p", "Auto"],
-    }));
+    // Format servers and fill in types, providers, direct URLs, and supported qualities
+    let formattedServers = episode.servers.map((s) => {
+      const resolved = resolveStreamUrl(s.url, s.quality || undefined);
+      return {
+        id: s.id,
+        name: s.name || resolved.defaultName,
+        url: s.url,
+        directUrl: s.directUrl || resolved.directUrl,
+        provider: s.provider || resolved.provider,
+        category: s.category || resolved.category,
+        quality: s.quality || resolved.quality,
+        type: s.type || resolved.type,
+        priority: s.priority,
+        isWorking: s.isWorking,
+        lastCheckedAt: s.lastCheckedAt,
+        latencyMs: s.latencyMs || null,
+        supportedQualities: s.supportedQualities && s.supportedQualities.length > 0
+          ? s.supportedQualities
+          : ["1080p", "720p", "480p", "Auto"],
+      };
+    });
 
     // If no servers exist in database, check fallback JSON
     if (formattedServers.length === 0) {
@@ -176,28 +208,40 @@ episodesRoutes.get("/:id", async (c) => {
         (e) => String(e.id) === episode.id || Number(e.episodeNumber || e.episode_number) === episode.episodeNumber
       );
       if (staticEp?.servers && staticEp.servers.length > 0) {
-        formattedServers = staticEp.servers.map((s: any, idx: number) => ({
-          id: s.id || `srv-fb-${idx + 1}`,
-          name: s.name || `سيرفر ${idx + 1}`,
-          url: s.url,
-          quality: s.quality || "1080p FHD",
-          type: detectServerType(s.url, s.type),
-          priority: idx + 1,
-          isWorking: true,
-          lastCheckedAt: null,
-          supportedQualities: ["1080p", "720p", "480p", "Auto"],
-        }));
+        formattedServers = staticEp.servers.map((s: any, idx: number) => {
+          const resolved = resolveStreamUrl(s.url, s.quality);
+          return {
+            id: s.id || `srv-fb-${idx + 1}`,
+            name: s.name || resolved.defaultName,
+            url: s.url,
+            directUrl: resolved.directUrl,
+            provider: resolved.provider,
+            category: resolved.category,
+            quality: s.quality || resolved.quality,
+            type: s.type || resolved.type,
+            priority: idx + 1,
+            isWorking: true,
+            lastCheckedAt: null,
+            latencyMs: null,
+            supportedQualities: ["1080p", "720p", "480p", "Auto"],
+          };
+        });
       } else if (staticEp?.mega_link) {
+        const resolved = resolveStreamUrl(staticEp.mega_link, "1080p FHD");
         formattedServers = [
           {
             id: `srv-mega-${episode.id}`,
             name: "سيرفر ميجا السريع",
             url: staticEp.mega_link,
+            directUrl: resolved.directUrl,
+            provider: "mega",
+            category: "both",
             quality: "1080p FHD",
             type: "mega",
             priority: 1,
             isWorking: true,
             lastCheckedAt: null,
+            latencyMs: null,
             supportedQualities: ["1080p", "720p", "480p", "Auto"],
           },
         ];
@@ -231,9 +275,14 @@ episodesRoutes.get("/:id", async (c) => {
       ? episode.audioTracks
       : DEFAULT_AUDIO_TRACKS;
 
+    const watchServers = formattedServers.filter((s) => s.category === "streaming" || s.category === "both");
+    const downloadServers = formattedServers.filter((s) => s.category === "download" || s.category === "both");
+
     return sendSuccess(c, {
       ...episode,
       servers: formattedServers,
+      watchServers,
+      downloadServers,
       subtitles: episode.subtitles || [],
       audioTracks,
       storyboardUrl: episode.storyboardUrl || null,

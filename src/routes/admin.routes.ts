@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "../lib/prisma";
 import { sendSuccess, sendError } from "../lib/response";
 import { adminOnlyMiddleware } from "../middleware/auth";
+import { resolveStreamUrl } from "../lib/resolvers";
 
 export const adminRoutes = new Hono();
 
@@ -92,16 +93,19 @@ adminRoutes.get("/servers", async (c) => {
 
 const serverSchema = z.object({
   episodeId: z.string().min(1, "معرف الحلقة مطلوب"),
-  name: z.string().min(1, "اسم السيرفر مطلوب"),
+  name: z.string().optional(),
   url: z.string().url("رابط السيرفر يجب أن يكون رابطاً صالحاً"),
-  type: z.enum(["hls", "mp4", "embed", "mega", "dash"]).default("hls"),
+  directUrl: z.string().url().optional().nullable(),
+  provider: z.string().optional(),
+  category: z.enum(["streaming", "download", "both"]).optional().default("streaming"),
+  type: z.enum(["hls", "mp4", "embed", "mega", "dash"]).optional(),
   quality: z.string().optional().default("1080p FHD"),
   priority: z.number().int().min(1).default(1),
   isWorking: z.boolean().default(true),
   supportedQualities: z.array(z.string()).optional().default(["1080p", "720p", "480p", "Auto"]),
 });
 
-// POST /api/admin/servers - إضافة سيرفر جديد لحلقة
+// POST /api/admin/servers - إضافة سيرفر فردي لحلقة مع التحليل التلقائي
 adminRoutes.post("/servers", async (c) => {
   try {
     const body = await c.req.json();
@@ -111,13 +115,90 @@ adminRoutes.post("/servers", async (c) => {
       return sendError(c, "VALIDATION_ERROR", parsed.error.errors[0]?.message || "بيانات السيرفر غير صالحة", 400);
     }
 
+    const resolved = resolveStreamUrl(parsed.data.url, parsed.data.quality);
+
     const server = await prisma.server.create({
-      data: parsed.data,
+      data: {
+        episodeId: parsed.data.episodeId,
+        url: parsed.data.url.trim(),
+        name: parsed.data.name || resolved.defaultName,
+        directUrl: parsed.data.directUrl || resolved.directUrl,
+        provider: parsed.data.provider || resolved.provider,
+        category: parsed.data.category || resolved.category,
+        type: parsed.data.type || resolved.type,
+        quality: parsed.data.quality || resolved.quality,
+        priority: parsed.data.priority,
+        isWorking: parsed.data.isWorking,
+        supportedQualities: parsed.data.supportedQualities,
+        lastCheckedAt: new Date(),
+      },
     });
 
     return sendSuccess(c, server, undefined, 201);
   } catch (error: any) {
     return sendError(c, "CREATE_SERVER_ERROR", error.message || "فشل إضافة السيرفر", 500);
+  }
+});
+
+// POST /api/admin/episodes/:id/servers/batch - إضافة مصفوفة سيرفرات متعددة دفعة واحدة (Anime Slayer Style)
+const batchServerSchema = z.object({
+  servers: z.array(
+    z.object({
+      url: z.string().url("رابط السيرفر غير صالح"),
+      name: z.string().optional(),
+      quality: z.string().optional().default("1080p FHD"),
+      category: z.enum(["streaming", "download", "both"]).optional(),
+      priority: z.number().int().min(1).optional(),
+    })
+  ).min(1, "يجب إرسال سيرفر واحد على الأقل"),
+});
+
+adminRoutes.post("/episodes/:id/servers/batch", async (c) => {
+  try {
+    const episodeId = c.req.param("id");
+    const body = await c.req.json();
+    const parsed = batchServerSchema.safeParse(body);
+
+    if (!parsed.success) {
+      return sendError(c, "VALIDATION_ERROR", parsed.error.errors[0]?.message || "بيانات السيرفرات غير صالحة", 400);
+    }
+
+    const createdServers = [];
+    let priorityTracker = 1;
+
+    for (const item of parsed.data.servers) {
+      const resolved = resolveStreamUrl(item.url, item.quality);
+      const server = await prisma.server.create({
+        data: {
+          episodeId,
+          url: item.url.trim(),
+          directUrl: resolved.directUrl,
+          provider: resolved.provider,
+          name: item.name || resolved.defaultName,
+          type: resolved.type,
+          category: item.category || resolved.category,
+          quality: item.quality || resolved.quality,
+          priority: item.priority !== undefined ? item.priority : priorityTracker++,
+          isWorking: true,
+          supportedQualities: ["1080p", "720p", "480p", "Auto"],
+          lastCheckedAt: new Date(),
+        },
+      });
+      createdServers.push(server);
+    }
+
+    return sendSuccess(
+      c,
+      {
+        totalAdded: createdServers.length,
+        servers: createdServers,
+        message: `تمت إضافة وتصنيف وحل روابط ${createdServers.length} سيرفرات بنجاح بمحرك البث المباشر`,
+      },
+      undefined,
+      201
+    );
+  } catch (error: any) {
+    return sendError(c, "BATCH_SERVER_ERROR", error.message || "فشل إضافة مصفوفة السيرفرات", 500);
   }
 });
 

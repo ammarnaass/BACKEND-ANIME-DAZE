@@ -9426,6 +9426,170 @@ var coerce = {
 };
 var NEVER = INVALID;
 
+// src/lib/resolvers.ts
+function detectProvider(url, explicitProvider) {
+  if (explicitProvider && [
+    "hls",
+    "mega",
+    "dropbox",
+    "4shared",
+    "gdrive",
+    "mediafire",
+    "vidmoly",
+    "okru",
+    "streamtape",
+    "mp4upload",
+    "custom"
+  ].includes(explicitProvider)) {
+    return explicitProvider;
+  }
+  const lower = url.toLowerCase();
+  if (lower.includes("mega.nz") || lower.includes("mega.io")) return "mega";
+  if (lower.includes("dropbox.com") || lower.includes("dropboxusercontent.com")) return "dropbox";
+  if (lower.includes("4shared.com")) return "4shared";
+  if (lower.includes("drive.google.com") || lower.includes("docs.google.com")) return "gdrive";
+  if (lower.includes("mediafire.com")) return "mediafire";
+  if (lower.includes("ok.ru") || lower.includes("odnoklassniki")) return "okru";
+  if (lower.includes("vidmoly")) return "vidmoly";
+  if (lower.includes("streamtape")) return "streamtape";
+  if (lower.includes("mp4upload")) return "mp4upload";
+  if (lower.includes(".m3u8")) return "hls";
+  return "custom";
+}
+function resolveStreamUrl(url, qualityHint) {
+  const provider = detectProvider(url);
+  const quality = qualityHint || "1080p FHD";
+  let directUrl = url.trim();
+  let type = "hls";
+  let defaultName = "\u0633\u064A\u0631\u0641\u0631 \u0627\u0644\u0628\u062B \u0627\u0644\u0645\u0628\u0627\u0634\u0631";
+  let category = "both";
+  switch (provider) {
+    case "dropbox": {
+      defaultName = `\u0633\u064A\u0631\u0641\u0631 \u062F\u0631\u0648\u0628 \u0628\u0648\u0643\u0633 \u0627\u0644\u0633\u0631\u064A\u0639 (${quality})`;
+      type = "mp4";
+      category = "both";
+      if (directUrl.includes("dropbox.com")) {
+        try {
+          const parsed = new URL(directUrl);
+          parsed.searchParams.delete("dl");
+          parsed.searchParams.set("raw", "1");
+          directUrl = parsed.toString();
+        } catch {
+          directUrl = directUrl.replace("?dl=0", "?raw=1").replace("&dl=0", "&raw=1");
+          if (!directUrl.includes("raw=1")) {
+            directUrl += directUrl.includes("?") ? "&raw=1" : "?raw=1";
+          }
+        }
+      }
+      break;
+    }
+    case "mega": {
+      defaultName = `\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u062E\u0627\u0631\u0642 (${quality})`;
+      type = "mega";
+      category = "both";
+      if (directUrl.includes("/file/")) {
+        directUrl = directUrl.replace("/file/", "/embed/");
+      }
+      break;
+    }
+    case "gdrive": {
+      defaultName = `\u0633\u064A\u0631\u0641\u0631 \u062C\u0648\u062C\u0644 \u062F\u0631\u0627\u064A\u0641 (${quality})`;
+      category = "both";
+      type = "embed";
+      const match2 = directUrl.match(/\/d\/([a-zA-Z0-9_-]+)/) || directUrl.match(/id=([a-zA-Z0-9_-]+)/);
+      if (match2 && match2[1]) {
+        directUrl = `https://drive.google.com/file/d/${match2[1]}/preview`;
+      }
+      break;
+    }
+    case "4shared": {
+      defaultName = `\u0633\u064A\u0631\u0641\u0631 \u0641\u0648\u0631\u0634\u064A\u0631\u062F \u0627\u0644\u0645\u0628\u0627\u0634\u0631 (${quality})`;
+      type = "embed";
+      category = "both";
+      const match2 = directUrl.match(/\/video\/([a-zA-Z0-9_-]+)/);
+      if (match2 && match2[1]) {
+        directUrl = `https://www.4shared.com/web/embed/file/${match2[1]}`;
+      }
+      break;
+    }
+    case "mediafire": {
+      defaultName = `\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062F\u064A\u0627 \u0641\u0627\u064A\u0631 (${quality})`;
+      type = "mp4";
+      category = "download";
+      break;
+    }
+    case "vidmoly": {
+      defaultName = `\u0633\u064A\u0631\u0641\u0631 \u0641\u064A\u062F\u0645\u0648\u0644\u064A (${quality})`;
+      type = "embed";
+      category = "streaming";
+      if (directUrl.includes("/w/")) {
+        directUrl = directUrl.replace("/w/", "/embed-");
+      }
+      break;
+    }
+    case "okru": {
+      defaultName = `\u0633\u064A\u0631\u0641\u0631 \u0623\u0648\u0643\u064A \u0631\u0648 (${quality})`;
+      type = "embed";
+      category = "streaming";
+      const match2 = directUrl.match(/video\/([0-9]+)/);
+      if (match2 && match2[1]) {
+        directUrl = `https://ok.ru/videoembed/${match2[1]}`;
+      }
+      break;
+    }
+    case "streamtape": {
+      defaultName = `\u0633\u064A\u0631\u0641\u0631 \u0633\u062A\u0631\u064A\u0645 \u062A\u064A\u0628 (${quality})`;
+      type = "embed";
+      category = "streaming";
+      if (directUrl.includes("/v/")) {
+        directUrl = directUrl.replace("/v/", "/e/");
+      }
+      break;
+    }
+    case "mp4upload": {
+      defaultName = `\u0633\u064A\u0631\u0641\u0631 \u0625\u0645 \u0628\u064A \u0641\u0648\u0631 \u0623\u0628\u0644\u0648\u062F (${quality})`;
+      type = "embed";
+      category = "streaming";
+      const match2 = directUrl.match(/([a-zA-Z0-9]+)\.html/);
+      if (match2 && match2[1]) {
+        directUrl = `https://www.mp4upload.com/embed-${match2[1]}.html`;
+      }
+      break;
+    }
+    case "hls": {
+      defaultName = `\u0633\u064A\u0631\u0641\u0631 \u0627\u0644\u0623\u0633\u0637\u0648\u0631\u0629 \u0641\u0627\u0626\u0642 \u0627\u0644\u0633\u0631\u0639\u0629 (${quality})`;
+      type = "hls";
+      category = "streaming";
+      break;
+    }
+    default: {
+      const lower = directUrl.toLowerCase();
+      if (lower.includes(".m3u8")) {
+        type = "hls";
+        defaultName = `\u0633\u064A\u0631\u0641\u0631 HLS \u0627\u0644\u0645\u0628\u0627\u0634\u0631 (${quality})`;
+      } else if (lower.includes(".mpd")) {
+        type = "dash";
+        defaultName = `\u0633\u064A\u0631\u0641\u0631 DASH \u0627\u0644\u062A\u0643\u064A\u0641\u064A (${quality})`;
+      } else if (lower.includes(".mp4")) {
+        type = "mp4";
+        defaultName = `\u0633\u064A\u0631\u0641\u0631 MP4 \u0627\u0644\u0645\u0628\u0627\u0634\u0631 (${quality})`;
+      } else {
+        type = "embed";
+        defaultName = `\u0633\u064A\u0631\u0641\u0631 \u0627\u0644\u0628\u062B \u0627\u0644\u0628\u062F\u064A\u0644 (${quality})`;
+      }
+      break;
+    }
+  }
+  return {
+    provider,
+    type,
+    defaultName,
+    directUrl,
+    category,
+    quality
+  };
+}
+
 // src/data/episodes.json
 var episodes_default = [
   {
@@ -11727,6 +11891,26 @@ episodesRoutes.get("/:id", async (c) => {
           supportedQualities: ["1080p", "720p", "480p", "Auto"]
         }
       ] : [];
+      const mappedStaticServers = staticServers.map((s) => {
+        const resolved = resolveStreamUrl(s.url, s.quality);
+        return {
+          id: s.id,
+          name: s.name || resolved.defaultName,
+          url: s.url,
+          directUrl: resolved.directUrl,
+          provider: resolved.provider,
+          category: resolved.category,
+          quality: s.quality || resolved.quality,
+          type: s.type || resolved.type,
+          priority: s.priority || 1,
+          isWorking: true,
+          lastCheckedAt: null,
+          latencyMs: null,
+          supportedQualities: s.supportedQualities || ["1080p", "720p", "480p", "Auto"]
+        };
+      });
+      const watchServers2 = mappedStaticServers.filter((s) => s.category === "streaming" || s.category === "both");
+      const downloadServers2 = mappedStaticServers.filter((s) => s.category === "download" || s.category === "both");
       return sendSuccess(c, {
         id: String(staticEp.id),
         animeId: staticEp.animeId || "slam-dunk",
@@ -11749,50 +11933,71 @@ episodesRoutes.get("/:id", async (c) => {
           title: "\u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643 (Slam Dunk)",
           coverImage: "/hero-bg.jpg"
         },
-        servers: staticServers,
+        servers: mappedStaticServers,
+        watchServers: watchServers2,
+        downloadServers: downloadServers2,
         comments: [],
         nextEpisode: null,
         prevEpisode: null
       });
     }
-    let formattedServers = episode.servers.map((s) => ({
-      id: s.id,
-      name: s.name,
-      url: s.url,
-      quality: s.quality || "1080p FHD",
-      type: detectServerType(s.url, s.type),
-      priority: s.priority,
-      isWorking: s.isWorking,
-      lastCheckedAt: s.lastCheckedAt,
-      supportedQualities: s.supportedQualities && s.supportedQualities.length > 0 ? s.supportedQualities : ["1080p", "720p", "480p", "Auto"]
-    }));
+    let formattedServers = episode.servers.map((s) => {
+      const resolved = resolveStreamUrl(s.url, s.quality || void 0);
+      return {
+        id: s.id,
+        name: s.name || resolved.defaultName,
+        url: s.url,
+        directUrl: s.directUrl || resolved.directUrl,
+        provider: s.provider || resolved.provider,
+        category: s.category || resolved.category,
+        quality: s.quality || resolved.quality,
+        type: s.type || resolved.type,
+        priority: s.priority,
+        isWorking: s.isWorking,
+        lastCheckedAt: s.lastCheckedAt,
+        latencyMs: s.latencyMs || null,
+        supportedQualities: s.supportedQualities && s.supportedQualities.length > 0 ? s.supportedQualities : ["1080p", "720p", "480p", "Auto"]
+      };
+    });
     if (formattedServers.length === 0) {
       const staticEp = episodes_default.find(
         (e) => String(e.id) === episode.id || Number(e.episodeNumber || e.episode_number) === episode.episodeNumber
       );
       if (staticEp?.servers && staticEp.servers.length > 0) {
-        formattedServers = staticEp.servers.map((s, idx) => ({
-          id: s.id || `srv-fb-${idx + 1}`,
-          name: s.name || `\u0633\u064A\u0631\u0641\u0631 ${idx + 1}`,
-          url: s.url,
-          quality: s.quality || "1080p FHD",
-          type: detectServerType(s.url, s.type),
-          priority: idx + 1,
-          isWorking: true,
-          lastCheckedAt: null,
-          supportedQualities: ["1080p", "720p", "480p", "Auto"]
-        }));
+        formattedServers = staticEp.servers.map((s, idx) => {
+          const resolved = resolveStreamUrl(s.url, s.quality);
+          return {
+            id: s.id || `srv-fb-${idx + 1}`,
+            name: s.name || resolved.defaultName,
+            url: s.url,
+            directUrl: resolved.directUrl,
+            provider: resolved.provider,
+            category: resolved.category,
+            quality: s.quality || resolved.quality,
+            type: s.type || resolved.type,
+            priority: idx + 1,
+            isWorking: true,
+            lastCheckedAt: null,
+            latencyMs: null,
+            supportedQualities: ["1080p", "720p", "480p", "Auto"]
+          };
+        });
       } else if (staticEp?.mega_link) {
+        const resolved = resolveStreamUrl(staticEp.mega_link, "1080p FHD");
         formattedServers = [
           {
             id: `srv-mega-${episode.id}`,
             name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
             url: staticEp.mega_link,
+            directUrl: resolved.directUrl,
+            provider: "mega",
+            category: "both",
             quality: "1080p FHD",
             type: "mega",
             priority: 1,
             isWorking: true,
             lastCheckedAt: null,
+            latencyMs: null,
             supportedQualities: ["1080p", "720p", "480p", "Auto"]
           }
         ];
@@ -11820,9 +12025,13 @@ episodesRoutes.get("/:id", async (c) => {
       })
     ]);
     const audioTracks = episode.audioTracks && episode.audioTracks.length > 0 ? episode.audioTracks : DEFAULT_AUDIO_TRACKS;
+    const watchServers = formattedServers.filter((s) => s.category === "streaming" || s.category === "both");
+    const downloadServers = formattedServers.filter((s) => s.category === "download" || s.category === "both");
     return sendSuccess(c, {
       ...episode,
       servers: formattedServers,
+      watchServers,
+      downloadServers,
       subtitles: episode.subtitles || [],
       audioTracks,
       storyboardUrl: episode.storyboardUrl || null,
@@ -12319,11 +12528,33 @@ function formatEpisode(ep, fallbackAnimeId) {
           id: `srv-mega-${epIdStr}`,
           name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
           url: fallbackEp.mega_link,
-          quality: "1080p FHD"
+          quality: "1080p FHD",
+          provider: "mega",
+          category: "both"
         }
       ];
     }
   }
+  const mappedServers = servers.map((s, idx) => {
+    const resolved = resolveStreamUrl(s.url || "", s.quality);
+    return {
+      id: s.id || `srv-${Math.random().toString(36).substring(2, 7)}`,
+      name: s.name || resolved.defaultName,
+      url: s.url,
+      directUrl: s.directUrl || resolved.directUrl,
+      provider: s.provider || resolved.provider,
+      category: s.category || resolved.category,
+      quality: s.quality || resolved.quality,
+      type: s.type || resolved.type,
+      priority: s.priority || idx + 1,
+      isWorking: s.isWorking !== void 0 ? Boolean(s.isWorking) : true,
+      lastCheckedAt: s.lastCheckedAt || null,
+      latencyMs: s.latencyMs || null,
+      supportedQualities: s.supportedQualities && s.supportedQualities.length > 0 ? s.supportedQualities : ["1080p", "720p", "480p", "Auto"]
+    };
+  });
+  const watchServers = mappedServers.filter((s) => s.category === "streaming" || s.category === "both");
+  const downloadServers = mappedServers.filter((s) => s.category === "download" || s.category === "both");
   return {
     id: epIdStr,
     animeId: ep.animeId || fallbackAnimeId || "slam-dunk",
@@ -12357,26 +12588,9 @@ function formatEpisode(ep, fallbackAnimeId) {
         isDefault: false
       }
     ],
-    servers: servers.map((s, idx) => {
-      const url = s.url || "";
-      const lower = url.toLowerCase();
-      let sType = s.type || "hls";
-      if (lower.includes("mega.nz") || lower.includes("mega.io")) sType = "mega";
-      else if (lower.includes(".m3u8")) sType = "hls";
-      else if (lower.includes(".mpd")) sType = "dash";
-      else if (lower.includes(".mp4")) sType = "mp4";
-      else if (lower.includes("embed") || lower.includes("iframe") || lower.includes("ok.ru") || lower.includes("vidmoly")) sType = "embed";
-      return {
-        id: s.id || `srv-${Math.random().toString(36).substring(2, 7)}`,
-        name: s.name,
-        url: s.url,
-        quality: s.quality || "1080p FHD",
-        type: sType,
-        priority: s.priority || idx + 1,
-        isWorking: s.isWorking !== void 0 ? Boolean(s.isWorking) : true,
-        supportedQualities: s.supportedQualities && s.supportedQualities.length > 0 ? s.supportedQualities : ["1080p", "720p", "480p", "Auto"]
-      };
-    }),
+    servers: mappedServers,
+    watchServers,
+    downloadServers,
     createdAt: ep.createdAt ? typeof ep.createdAt === "string" ? ep.createdAt : ep.createdAt.toISOString() : (/* @__PURE__ */ new Date()).toISOString()
   };
 }
@@ -12796,9 +13010,12 @@ adminRoutes.get("/servers", async (c) => {
 });
 var serverSchema = external_exports.object({
   episodeId: external_exports.string().min(1, "\u0645\u0639\u0631\u0641 \u0627\u0644\u062D\u0644\u0642\u0629 \u0645\u0637\u0644\u0648\u0628"),
-  name: external_exports.string().min(1, "\u0627\u0633\u0645 \u0627\u0644\u0633\u064A\u0631\u0641\u0631 \u0645\u0637\u0644\u0648\u0628"),
+  name: external_exports.string().optional(),
   url: external_exports.string().url("\u0631\u0627\u0628\u0637 \u0627\u0644\u0633\u064A\u0631\u0641\u0631 \u064A\u062C\u0628 \u0623\u0646 \u064A\u0643\u0648\u0646 \u0631\u0627\u0628\u0637\u0627\u064B \u0635\u0627\u0644\u062D\u0627\u064B"),
-  type: external_exports.enum(["hls", "mp4", "embed", "mega", "dash"]).default("hls"),
+  directUrl: external_exports.string().url().optional().nullable(),
+  provider: external_exports.string().optional(),
+  category: external_exports.enum(["streaming", "download", "both"]).optional().default("streaming"),
+  type: external_exports.enum(["hls", "mp4", "embed", "mega", "dash"]).optional(),
   quality: external_exports.string().optional().default("1080p FHD"),
   priority: external_exports.number().int().min(1).default(1),
   isWorking: external_exports.boolean().default(true),
@@ -12811,12 +13028,81 @@ adminRoutes.post("/servers", async (c) => {
     if (!parsed.success) {
       return sendError(c, "VALIDATION_ERROR", parsed.error.errors[0]?.message || "\u0628\u064A\u0627\u0646\u0627\u062A \u0627\u0644\u0633\u064A\u0631\u0641\u0631 \u063A\u064A\u0631 \u0635\u0627\u0644\u062D\u0629", 400);
     }
+    const resolved = resolveStreamUrl(parsed.data.url, parsed.data.quality);
     const server = await prisma.server.create({
-      data: parsed.data
+      data: {
+        episodeId: parsed.data.episodeId,
+        url: parsed.data.url.trim(),
+        name: parsed.data.name || resolved.defaultName,
+        directUrl: parsed.data.directUrl || resolved.directUrl,
+        provider: parsed.data.provider || resolved.provider,
+        category: parsed.data.category || resolved.category,
+        type: parsed.data.type || resolved.type,
+        quality: parsed.data.quality || resolved.quality,
+        priority: parsed.data.priority,
+        isWorking: parsed.data.isWorking,
+        supportedQualities: parsed.data.supportedQualities,
+        lastCheckedAt: /* @__PURE__ */ new Date()
+      }
     });
     return sendSuccess(c, server, void 0, 201);
   } catch (error) {
     return sendError(c, "CREATE_SERVER_ERROR", error.message || "\u0641\u0634\u0644 \u0625\u0636\u0627\u0641\u0629 \u0627\u0644\u0633\u064A\u0631\u0641\u0631", 500);
+  }
+});
+var batchServerSchema = external_exports.object({
+  servers: external_exports.array(
+    external_exports.object({
+      url: external_exports.string().url("\u0631\u0627\u0628\u0637 \u0627\u0644\u0633\u064A\u0631\u0641\u0631 \u063A\u064A\u0631 \u0635\u0627\u0644\u062D"),
+      name: external_exports.string().optional(),
+      quality: external_exports.string().optional().default("1080p FHD"),
+      category: external_exports.enum(["streaming", "download", "both"]).optional(),
+      priority: external_exports.number().int().min(1).optional()
+    })
+  ).min(1, "\u064A\u062C\u0628 \u0625\u0631\u0633\u0627\u0644 \u0633\u064A\u0631\u0641\u0631 \u0648\u0627\u062D\u062F \u0639\u0644\u0649 \u0627\u0644\u0623\u0642\u0644")
+});
+adminRoutes.post("/episodes/:id/servers/batch", async (c) => {
+  try {
+    const episodeId = c.req.param("id");
+    const body = await c.req.json();
+    const parsed = batchServerSchema.safeParse(body);
+    if (!parsed.success) {
+      return sendError(c, "VALIDATION_ERROR", parsed.error.errors[0]?.message || "\u0628\u064A\u0627\u0646\u0627\u062A \u0627\u0644\u0633\u064A\u0631\u0641\u0631\u0627\u062A \u063A\u064A\u0631 \u0635\u0627\u0644\u062D\u0629", 400);
+    }
+    const createdServers = [];
+    let priorityTracker = 1;
+    for (const item of parsed.data.servers) {
+      const resolved = resolveStreamUrl(item.url, item.quality);
+      const server = await prisma.server.create({
+        data: {
+          episodeId,
+          url: item.url.trim(),
+          directUrl: resolved.directUrl,
+          provider: resolved.provider,
+          name: item.name || resolved.defaultName,
+          type: resolved.type,
+          category: item.category || resolved.category,
+          quality: item.quality || resolved.quality,
+          priority: item.priority !== void 0 ? item.priority : priorityTracker++,
+          isWorking: true,
+          supportedQualities: ["1080p", "720p", "480p", "Auto"],
+          lastCheckedAt: /* @__PURE__ */ new Date()
+        }
+      });
+      createdServers.push(server);
+    }
+    return sendSuccess(
+      c,
+      {
+        totalAdded: createdServers.length,
+        servers: createdServers,
+        message: `\u062A\u0645\u062A \u0625\u0636\u0627\u0641\u0629 \u0648\u062A\u0635\u0646\u064A\u0641 \u0648\u062D\u0644 \u0631\u0648\u0627\u0628\u0637 ${createdServers.length} \u0633\u064A\u0631\u0641\u0631\u0627\u062A \u0628\u0646\u062C\u0627\u062D \u0628\u0645\u062D\u0631\u0643 \u0627\u0644\u0628\u062B \u0627\u0644\u0645\u0628\u0627\u0634\u0631`
+      },
+      void 0,
+      201
+    );
+  } catch (error) {
+    return sendError(c, "BATCH_SERVER_ERROR", error.message || "\u0641\u0634\u0644 \u0625\u0636\u0627\u0641\u0629 \u0645\u0635\u0641\u0648\u0641\u0629 \u0627\u0644\u0633\u064A\u0631\u0641\u0631\u0627\u062A", 500);
   }
 });
 adminRoutes.put("/servers/:id", async (c) => {

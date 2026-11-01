@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { prisma } from "../lib/prisma";
 import { sendSuccess, sendError } from "../lib/response";
 import { optionalAuthMiddleware, authMiddleware } from "../middleware/auth";
+import { resolveStreamUrl } from "../lib/resolvers";
 import rawEpisodes from "../data/episodes.json";
 import rawAnimes from "../data/animes.json";
 import rawCharacters from "../data/characters.json";
@@ -33,10 +34,36 @@ function formatEpisode(ep: any, fallbackAnimeId?: string) {
           name: "سيرفر ميجا السريع",
           url: fallbackEp.mega_link,
           quality: "1080p FHD",
+          provider: "mega",
+          category: "both",
         },
       ];
     }
   }
+
+  const mappedServers = servers.map((s: any, idx: number) => {
+    const resolved = resolveStreamUrl(s.url || "", s.quality);
+    return {
+      id: s.id || `srv-${Math.random().toString(36).substring(2, 7)}`,
+      name: s.name || resolved.defaultName,
+      url: s.url,
+      directUrl: s.directUrl || resolved.directUrl,
+      provider: s.provider || resolved.provider,
+      category: s.category || resolved.category,
+      quality: s.quality || resolved.quality,
+      type: s.type || resolved.type,
+      priority: s.priority || idx + 1,
+      isWorking: s.isWorking !== undefined ? Boolean(s.isWorking) : true,
+      lastCheckedAt: s.lastCheckedAt || null,
+      latencyMs: s.latencyMs || null,
+      supportedQualities: s.supportedQualities && s.supportedQualities.length > 0
+        ? s.supportedQualities
+        : ["1080p", "720p", "480p", "Auto"],
+    };
+  });
+
+  const watchServers = mappedServers.filter((s: any) => s.category === "streaming" || s.category === "both");
+  const downloadServers = mappedServers.filter((s: any) => s.category === "download" || s.category === "both");
 
   return {
     id: epIdStr,
@@ -73,29 +100,9 @@ function formatEpisode(ep: any, fallbackAnimeId?: string) {
             isDefault: false,
           },
         ],
-    servers: servers.map((s: any, idx: number) => {
-      const url = s.url || "";
-      const lower = url.toLowerCase();
-      let sType = s.type || "hls";
-      if (lower.includes("mega.nz") || lower.includes("mega.io")) sType = "mega";
-      else if (lower.includes(".m3u8")) sType = "hls";
-      else if (lower.includes(".mpd")) sType = "dash";
-      else if (lower.includes(".mp4")) sType = "mp4";
-      else if (lower.includes("embed") || lower.includes("iframe") || lower.includes("ok.ru") || lower.includes("vidmoly")) sType = "embed";
-
-      return {
-        id: s.id || `srv-${Math.random().toString(36).substring(2, 7)}`,
-        name: s.name,
-        url: s.url,
-        quality: s.quality || "1080p FHD",
-        type: sType,
-        priority: s.priority || idx + 1,
-        isWorking: s.isWorking !== undefined ? Boolean(s.isWorking) : true,
-        supportedQualities: s.supportedQualities && s.supportedQualities.length > 0
-          ? s.supportedQualities
-          : ["1080p", "720p", "480p", "Auto"],
-      };
-    }),
+    servers: mappedServers,
+    watchServers,
+    downloadServers,
     createdAt: ep.createdAt ? (typeof ep.createdAt === "string" ? ep.createdAt : ep.createdAt.toISOString()) : new Date().toISOString(),
   };
 }

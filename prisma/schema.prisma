@@ -109,16 +109,22 @@ model Server {
   episode            Episode   @relation(fields: [episodeId], references: [id], onDelete: Cascade)
   name               String
   url                String
-  quality            String?
-  type               String    @default("hls") // hls | mp4 | embed | mega
+  directUrl          String?   // رابط البث أو التنزيل المباشر بعد فك التشفير
+  provider           String    @default("custom") // hls | mega | dropbox | 4shared | gdrive | mediafire | vidmoly | okru | custom
+  category           String    @default("streaming") // streaming | download | both
+  quality            String?   @default("1080p FHD")
+  type               String    @default("hls") // hls | mp4 | embed | mega | dash
   priority           Int       @default(1)     // 1 = primary, 2 = secondary, etc.
   isWorking          Boolean   @default(true)
   lastCheckedAt      DateTime?
+  latencyMs          Int?
   supportedQualities String[]  @default(["1080p", "720p", "480p", "Auto"])
 
   @@index([episodeId])
   @@index([isWorking])
   @@index([priority])
+  @@index([provider])
+  @@index([category])
 }
 
 model Subtitle {
