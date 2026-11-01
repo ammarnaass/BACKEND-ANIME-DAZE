@@ -119,6 +119,7 @@ model Server {
   lastCheckedAt      DateTime?
   latencyMs          Int?
   supportedQualities String[]  @default(["1080p", "720p", "480p", "Auto"])
+  createdAt          DateTime  @default(now())
 
   @@index([episodeId])
   @@index([isWorking])

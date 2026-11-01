@@ -1,26 +1,197 @@
 /**
- * Anime Slayer & Anime Watch Grade Multi-Host Resolver & Stream Parser
- * Converts external host links (Mega, Dropbox, 4Shared, Google Drive, Mediafire, etc.)
- * into direct-playable or clean embed stream URLs without popup ads.
+ * Anime Slayer & Anime Watch Grade Multi-Host Multi-Server Resolver & Stream Parser
+ * Hardened Security Edition (Anti-SSRF & XSS Disarm)
  */
 
+export type ServerProvider =
+  | "hls"
+  | "mega"
+  | "dropbox"
+  | "4shared"
+  | "gdrive"
+  | "mediafire"
+  | "vidmoly"
+  | "okru"
+  | "streamtape"
+  | "mp4upload"
+  | "custom";
+
+export type ServerType = "hls" | "mp4" | "embed" | "mega" | "dash";
+
+export type ServerCategory = "streaming" | "download" | "both";
+
+export type ServerMatrixClassification = "direct" | "embed" | "download";
+
 export interface ResolvedServerInfo {
-  provider: "hls" | "mega" | "dropbox" | "4shared" | "gdrive" | "mediafire" | "vidmoly" | "okru" | "streamtape" | "mp4upload" | "custom";
-  type: "hls" | "mp4" | "embed" | "mega" | "dash";
+  provider: ServerProvider;
+  type: ServerType;
   defaultName: string;
   directUrl: string;
-  category: "streaming" | "download" | "both";
+  embedUrl: string;
+  downloadUrl?: string;
+  category: ServerCategory;
+  matrixCategory: ServerMatrixClassification;
   quality: string;
+  supportedQualities: string[];
+  isDirectPlayable: boolean;
 }
 
-export function detectProvider(url: string, explicitProvider?: string): ResolvedServerInfo["provider"] {
-  if (explicitProvider && [
-    "hls", "mega", "dropbox", "4shared", "gdrive", "mediafire", "vidmoly", "okru", "streamtape", "mp4upload", "custom"
-  ].includes(explicitProvider)) {
-    return explicitProvider as ResolvedServerInfo["provider"];
+export interface ServerHealthResult {
+  isWorking: boolean;
+  latencyMs: number;
+  statusCode?: number;
+  securityNotice?: string;
+}
+
+/**
+ * Strict Security Guard: Validates that a URL is safe to fetch or ping from the server.
+ * Prevents Server-Side Request Forgery (SSRF), loopback probes, and protocol smuggling.
+ */
+export function isSafeUrlForPing(urlString: string): { isSafe: boolean; reason?: string } {
+  if (!urlString || typeof urlString !== "string") {
+    return { isSafe: false, reason: "URL is empty or not a string" };
   }
 
-  const lower = url.toLowerCase();
+  if (urlString.length > 2048) {
+    return { isSafe: false, reason: "URL length exceeds safety threshold (2048 chars)" };
+  }
+
+  let parsed: URL;
+  try {
+    parsed = new URL(urlString.trim());
+  } catch {
+    return { isSafe: false, reason: "Malformed URL syntax" };
+  }
+
+  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+    return { isSafe: false, reason: `Forbidden URL scheme: ${parsed.protocol}` };
+  }
+
+  // Strip brackets from IPv6 hostnames (e.g. "[::1]" -> "::1")
+  const rawHostname = parsed.hostname.toLowerCase();
+  const cleanHost = rawHostname.replace(/^\[|\]$/g, "").toLowerCase();
+
+  // Block localhost, loopbacks, 0.0.0.0, and IPv6 loopback
+  if (
+    cleanHost === "localhost" ||
+    cleanHost === "127.0.0.1" ||
+    cleanHost === "0.0.0.0" ||
+    cleanHost === "::1" ||
+    cleanHost === "::" ||
+    cleanHost === "0:0:0:0:0:0:0:1" ||
+    cleanHost === "0:0:0:0:0:0:0:0"
+  ) {
+    return { isSafe: false, reason: "Forbidden loopback or internal hostname" };
+  }
+
+  // Block internal domain suffixes and wildcard dynamic DNS
+  if (
+    cleanHost.endsWith(".localhost") ||
+    cleanHost.endsWith(".local") ||
+    cleanHost.endsWith(".internal") ||
+    cleanHost.endsWith(".lan") ||
+    cleanHost.endsWith(".home") ||
+    cleanHost.endsWith(".corp") ||
+    cleanHost.endsWith(".intranet") ||
+    cleanHost.endsWith(".test") ||
+    cleanHost.endsWith(".invalid") ||
+    cleanHost.endsWith(".nip.io") ||
+    cleanHost.endsWith(".sslip.io") ||
+    cleanHost.endsWith(".xip.io")
+  ) {
+    return { isSafe: false, reason: "Forbidden internal or wildcard DNS domain" };
+  }
+
+  // Block Cloud metadata domains and IP addresses (AWS, GCP, Azure, DigitalOcean, Alibaba, Oracle)
+  if (
+    cleanHost === "169.254.169.254" ||
+    cleanHost === "metadata.google.internal" ||
+    cleanHost === "instance-data" ||
+    cleanHost === "100.100.100.200" ||
+    cleanHost.includes("metadata.google")
+  ) {
+    return { isSafe: false, reason: "Forbidden cloud metadata endpoint" };
+  }
+
+  // Block IPv6 link-local (fe80::/10), unique local / private (fc00::/7), and IPv4-mapped (::ffff:)
+  if (
+    cleanHost.startsWith("fe80:") ||
+    cleanHost.startsWith("fe8") ||
+    cleanHost.startsWith("fe9") ||
+    cleanHost.startsWith("fea") ||
+    cleanHost.startsWith("feb") ||
+    cleanHost.startsWith("fc") ||
+    cleanHost.startsWith("fd") ||
+    cleanHost.startsWith("::ffff:")
+  ) {
+    return { isSafe: false, reason: "Forbidden IPv6 link-local, private, or mapped address" };
+  }
+
+  // Check IPv4 private and link-local ranges:
+  // 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 169.254.0.0/16, 100.64.0.0/10, 127.0.0.0/8, 0.0.0.0/8, 224.0.0.0+ (multicast/reserved)
+  const ipv4Match = cleanHost.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+  if (ipv4Match) {
+    const p1 = parseInt(ipv4Match[1], 10);
+    const p2 = parseInt(ipv4Match[2], 10);
+    const p3 = parseInt(ipv4Match[3], 10);
+    const p4 = parseInt(ipv4Match[4], 10);
+
+    if (p1 > 255 || p2 > 255 || p3 > 255 || p4 > 255) {
+      return { isSafe: false, reason: "Malformed IPv4 octet value" };
+    }
+
+    if (
+      p1 === 10 ||
+      p1 === 127 ||
+      p1 === 0 ||
+      p1 >= 224 ||
+      (p1 === 172 && p2 >= 16 && p2 <= 31) ||
+      (p1 === 192 && p2 === 168) ||
+      (p1 === 169 && p2 === 254) ||
+      (p1 === 100 && p2 >= 64 && p2 <= 127)
+    ) {
+      return { isSafe: false, reason: "Forbidden private or link-local IPv4 address" };
+    }
+  }
+
+  // Check for decimal / octal / hex encoded IPv4 (e.g., 2130706433 = 127.0.0.1)
+  if (/^\d+$/.test(cleanHost) || /^0x[0-9a-fA-F]+$/.test(cleanHost)) {
+    return { isSafe: false, reason: "Obfuscated integer or hex IP address blocked" };
+  }
+
+  // Disallow non-standard internal ports
+  if (parsed.port) {
+    const port = parseInt(parsed.port, 10);
+    const ALLOWED_PORTS = [80, 443, 8080, 8443];
+    if (!ALLOWED_PORTS.includes(port)) {
+      return { isSafe: false, reason: `Port ${port} is restricted to prevent port scanning` };
+    }
+  }
+
+  return { isSafe: true };
+}
+
+export function detectProvider(url: string, explicitProvider?: string): ServerProvider {
+  if (
+    explicitProvider &&
+    [
+      "hls",
+      "mega",
+      "dropbox",
+      "4shared",
+      "gdrive",
+      "mediafire",
+      "vidmoly",
+      "okru",
+      "streamtape",
+      "mp4upload",
+      "custom",
+    ].includes(explicitProvider.toLowerCase())
+  ) {
+    return explicitProvider.toLowerCase() as ServerProvider;
+  }
+
+  const lower = (url || "").toLowerCase();
   if (lower.includes("mega.nz") || lower.includes("mega.io")) return "mega";
   if (lower.includes("dropbox.com") || lower.includes("dropboxusercontent.com")) return "dropbox";
   if (lower.includes("4shared.com")) return "4shared";
@@ -35,22 +206,49 @@ export function detectProvider(url: string, explicitProvider?: string): Resolved
 }
 
 export function resolveStreamUrl(url: string, qualityHint?: string): ResolvedServerInfo {
-  const provider = detectProvider(url);
+  const trimmed = (url || "").trim();
+
+  // Strict Security Check: URL MUST strictly begin with http:// or https://
+  const lowerTrimmed = trimmed.toLowerCase();
+  const isHttpOrHttps = lowerTrimmed.startsWith("http://") || lowerTrimmed.startsWith("https://");
+
+  if (!isHttpOrHttps || trimmed.length > 2048) {
+    return {
+      provider: "custom",
+      type: "embed",
+      defaultName: "رابط محظور أمنياً",
+      directUrl: "",
+      embedUrl: "",
+      downloadUrl: undefined,
+      category: "streaming",
+      matrixCategory: "embed",
+      quality: qualityHint || "1080p FHD",
+      supportedQualities: ["1080p", "720p", "480p", "Auto"],
+      isDirectPlayable: false,
+    };
+  }
+
+  const provider = detectProvider(trimmed);
   const quality = qualityHint || "1080p FHD";
 
-  let directUrl = url.trim();
-  let type: ResolvedServerInfo["type"] = "hls";
+  let directUrl = trimmed;
+  let embedUrl = directUrl;
+  let downloadUrl: string | undefined = undefined;
+  let type: ServerType = "hls";
   let defaultName = "سيرفر البث المباشر";
-  let category: ResolvedServerInfo["category"] = "both";
+  let category: ServerCategory = "both";
+  let matrixCategory: ServerMatrixClassification = "direct";
+  let isDirectPlayable = false;
 
   switch (provider) {
     case "dropbox": {
       defaultName = `سيرفر دروب بوكس السريع (${quality})`;
       type = "mp4";
       category = "both";
-      // Convert standard dropbox sharing link to direct media stream URL
+      matrixCategory = "direct";
+      isDirectPlayable = true;
+
       if (directUrl.includes("dropbox.com")) {
-        // Replace www.dropbox.com with dl.dropboxusercontent.com or force raw=1
         try {
           const parsed = new URL(directUrl);
           parsed.searchParams.delete("dl");
@@ -62,7 +260,12 @@ export function resolveStreamUrl(url: string, qualityHint?: string): ResolvedSer
             directUrl += directUrl.includes("?") ? "&raw=1" : "?raw=1";
           }
         }
+        if (directUrl.includes("www.dropbox.com/s/")) {
+          directUrl = directUrl.replace("www.dropbox.com/s/", "dl.dropboxusercontent.com/s/");
+        }
       }
+      embedUrl = directUrl;
+      downloadUrl = directUrl.replace("raw=1", "dl=1");
       break;
     }
 
@@ -70,22 +273,32 @@ export function resolveStreamUrl(url: string, qualityHint?: string): ResolvedSer
       defaultName = `سيرفر ميجا الخارق (${quality})`;
       type = "mega";
       category = "both";
-      // Convert file link to embed player if needed
-      // Format: https://mega.nz/file/ID#KEY -> https://mega.nz/embed/ID#KEY
+      matrixCategory = "direct";
+      isDirectPlayable = false;
+
       if (directUrl.includes("/file/")) {
-        directUrl = directUrl.replace("/file/", "/embed/");
+        embedUrl = directUrl.replace("/file/", "/embed/");
+      } else if (directUrl.includes("/embed/")) {
+        embedUrl = directUrl;
       }
+      directUrl = embedUrl;
+      downloadUrl = trimmed;
       break;
     }
 
     case "gdrive": {
-      defaultName = `سيرفر جوجل درايف (${quality})`;
+      defaultName = `سيرفر جوجل درايف السحابي (${quality})`;
       category = "both";
       type = "embed";
-      // Extract Google Drive ID
+      matrixCategory = "direct";
+      isDirectPlayable = false;
+
       const match = directUrl.match(/\/d\/([a-zA-Z0-9_-]+)/) || directUrl.match(/id=([a-zA-Z0-9_-]+)/);
       if (match && match[1]) {
-        directUrl = `https://drive.google.com/file/d/${match[1]}/preview`;
+        const fileId = match[1];
+        embedUrl = `https://drive.google.com/file/d/${fileId}/preview`;
+        directUrl = embedUrl;
+        downloadUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
       }
       break;
     }
@@ -94,19 +307,26 @@ export function resolveStreamUrl(url: string, qualityHint?: string): ResolvedSer
       defaultName = `سيرفر فورشيرد المباشر (${quality})`;
       type = "embed";
       category = "both";
-      // 4Shared video embed format:
-      // https://www.4shared.com/video/ID/file.html -> https://www.4shared.com/web/embed/file/ID
-      const match = directUrl.match(/\/video\/([a-zA-Z0-9_-]+)/);
+      matrixCategory = "direct";
+      isDirectPlayable = false;
+
+      const match = directUrl.match(/\/(?:video|file|rar|zip|mp3)\/([a-zA-Z0-9_-]+)/);
       if (match && match[1]) {
-        directUrl = `https://www.4shared.com/web/embed/file/${match[1]}`;
+        embedUrl = `https://www.4shared.com/web/embed/file/${match[1]}`;
+        directUrl = embedUrl;
+        downloadUrl = trimmed;
       }
       break;
     }
 
     case "mediafire": {
-      defaultName = `سيرفر ميديا فاير (${quality})`;
+      defaultName = `سيرفر ميديا فاير للتحميل السريع (${quality})`;
       type = "mp4";
-      category = "download"; // mediafire is primarily high-speed download
+      category = "download";
+      matrixCategory = "download";
+      isDirectPlayable = false;
+      downloadUrl = directUrl;
+      embedUrl = directUrl;
       break;
     }
 
@@ -114,19 +334,32 @@ export function resolveStreamUrl(url: string, qualityHint?: string): ResolvedSer
       defaultName = `سيرفر فيدمولي (${quality})`;
       type = "embed";
       category = "streaming";
+      matrixCategory = "embed";
+      isDirectPlayable = false;
+
       if (directUrl.includes("/w/")) {
-        directUrl = directUrl.replace("/w/", "/embed-");
+        embedUrl = directUrl.replace("/w/", "/embed-");
+      } else if (!directUrl.includes("/embed-") && directUrl.match(/vidmoly\.[a-z]+\/([a-zA-Z0-9]+)/)) {
+        const idMatch = directUrl.match(/vidmoly\.[a-z]+\/([a-zA-Z0-9]+)/);
+        if (idMatch && idMatch[1]) {
+          embedUrl = `https://vidmoly.me/embed-${idMatch[1]}.html`;
+        }
       }
+      directUrl = embedUrl;
       break;
     }
 
     case "okru": {
-      defaultName = `سيرفر أوكي رو (${quality})`;
+      defaultName = `سيرفر أوكي رو السحابي (${quality})`;
       type = "embed";
       category = "streaming";
+      matrixCategory = "embed";
+      isDirectPlayable = false;
+
       const match = directUrl.match(/video\/([0-9]+)/);
       if (match && match[1]) {
-        directUrl = `https://ok.ru/videoembed/${match[1]}`;
+        embedUrl = `https://ok.ru/videoembed/${match[1]}`;
+        directUrl = embedUrl;
       }
       break;
     }
@@ -135,9 +368,13 @@ export function resolveStreamUrl(url: string, qualityHint?: string): ResolvedSer
       defaultName = `سيرفر ستريم تيب (${quality})`;
       type = "embed";
       category = "streaming";
+      matrixCategory = "embed";
+      isDirectPlayable = false;
+
       if (directUrl.includes("/v/")) {
-        directUrl = directUrl.replace("/v/", "/e/");
+        embedUrl = directUrl.replace("/v/", "/e/");
       }
+      directUrl = embedUrl;
       break;
     }
 
@@ -145,17 +382,24 @@ export function resolveStreamUrl(url: string, qualityHint?: string): ResolvedSer
       defaultName = `سيرفر إم بي فور أبلود (${quality})`;
       type = "embed";
       category = "streaming";
+      matrixCategory = "embed";
+      isDirectPlayable = false;
+
       const match = directUrl.match(/([a-zA-Z0-9]+)\.html/);
       if (match && match[1]) {
-        directUrl = `https://www.mp4upload.com/embed-${match[1]}.html`;
+        embedUrl = `https://www.mp4upload.com/embed-${match[1]}.html`;
+        directUrl = embedUrl;
       }
       break;
     }
 
     case "hls": {
-      defaultName = `سيرفر الأسطورة فائق السرعة (${quality})`;
+      defaultName = `سيرفر المنصة المباشر (HLS ${quality})`;
       type = "hls";
       category = "streaming";
+      matrixCategory = "direct";
+      isDirectPlayable = true;
+      embedUrl = directUrl;
       break;
     }
 
@@ -163,17 +407,31 @@ export function resolveStreamUrl(url: string, qualityHint?: string): ResolvedSer
       const lower = directUrl.toLowerCase();
       if (lower.includes(".m3u8")) {
         type = "hls";
-        defaultName = `سيرفر HLS المباشر (${quality})`;
+        category = "streaming";
+        matrixCategory = "direct";
+        defaultName = `سيرفر HLS فائق السرعة (${quality})`;
+        isDirectPlayable = true;
       } else if (lower.includes(".mpd")) {
         type = "dash";
+        category = "streaming";
+        matrixCategory = "direct";
         defaultName = `سيرفر DASH التكيفي (${quality})`;
+        isDirectPlayable = true;
       } else if (lower.includes(".mp4")) {
         type = "mp4";
+        category = "both";
+        matrixCategory = "direct";
         defaultName = `سيرفر MP4 المباشر (${quality})`;
+        isDirectPlayable = true;
+        downloadUrl = directUrl;
       } else {
         type = "embed";
-        defaultName = `سيرفر البث البديل (${quality})`;
+        category = "streaming";
+        matrixCategory = "embed";
+        defaultName = `سيرفر البث الاحتياطي (${quality})`;
+        isDirectPlayable = false;
       }
+      embedUrl = directUrl;
       break;
     }
   }
@@ -183,7 +441,95 @@ export function resolveStreamUrl(url: string, qualityHint?: string): ResolvedSer
     type,
     defaultName,
     directUrl,
+    embedUrl,
+    downloadUrl,
     category,
+    matrixCategory,
     quality,
+    supportedQualities: ["1080p", "720p", "480p", "Auto"],
+    isDirectPlayable,
+  };
+}
+
+export async function testServerLatency(
+  url: string,
+  timeoutMs = 4000
+): Promise<ServerHealthResult> {
+  const safetyCheck = isSafeUrlForPing(url);
+  if (!safetyCheck.isSafe) {
+    return {
+      isWorking: false,
+      latencyMs: 9999,
+      securityNotice: `Blocked: ${safetyCheck.reason}`,
+    };
+  }
+
+  const startTime = Date.now();
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+    let response = await fetch(url, {
+      method: "HEAD",
+      signal: controller.signal,
+      redirect: "manual",
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) ANIME-DAZE/2.0",
+      },
+    }).catch(async () => {
+      return await fetch(url, {
+        method: "GET",
+        signal: controller.signal,
+        redirect: "manual",
+        headers: {
+          Range: "bytes=0-1024",
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) ANIME-DAZE/2.0",
+        },
+      });
+    });
+
+    clearTimeout(timeoutId);
+    const latencyMs = Math.max(15, Date.now() - startTime);
+    const isWorking = response.status < 400 || response.status === 403 || (response.status >= 300 && response.status < 400);
+
+    return {
+      isWorking,
+      latencyMs,
+      statusCode: response.status,
+    };
+  } catch {
+    return {
+      isWorking: false,
+      latencyMs: 9999,
+    };
+  }
+}
+
+export function categorizeServers<T extends { category?: string; provider?: string; type?: string; priority?: number }>(
+  servers: T[]
+) {
+  const watchServers = servers
+    .filter((s) => s.category === "streaming" || s.category === "both" || !s.category)
+    .sort((a, b) => (a.priority || 1) - (b.priority || 1));
+
+  const downloadServers = servers
+    .filter((s) => s.category === "download" || s.category === "both")
+    .sort((a, b) => (a.priority || 1) - (b.priority || 1));
+
+  const directServers = watchServers.filter((s) => {
+    const p = s.provider || "";
+    return ["hls", "dropbox", "mega", "gdrive", "4shared", "custom"].includes(p) && s.type !== "embed";
+  });
+
+  const backupServers = watchServers.filter((s) => {
+    const p = s.provider || "";
+    return ["vidmoly", "okru", "streamtape", "mp4upload"].includes(p) || s.type === "embed";
+  });
+
+  return {
+    watchServers,
+    downloadServers,
+    directServers,
+    backupServers,
   };
 }

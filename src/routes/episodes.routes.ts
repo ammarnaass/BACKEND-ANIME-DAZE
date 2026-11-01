@@ -303,6 +303,9 @@ episodesRoutes.get("/:id", async (c) => {
 episodesRoutes.get("/:id/progress", authMiddleware, async (c) => {
   try {
     const episodeId = c.req.param("id");
+    if (!episodeId) {
+      return sendError(c, "VALIDATION_ERROR", "معرف الحلقة مطلوب", 400);
+    }
     const user = c.get("user");
 
     const progress = await prisma.watchProgress.findUnique({
@@ -334,6 +337,9 @@ const progressSchema = z.object({
 episodesRoutes.post("/:id/progress", authMiddleware, async (c) => {
   try {
     const episodeId = c.req.param("id");
+    if (!episodeId) {
+      return sendError(c, "VALIDATION_ERROR", "معرف الحلقة مطلوب", 400);
+    }
     const user = c.get("user");
     const body = await c.req.json();
     const parsed = progressSchema.safeParse(body);
