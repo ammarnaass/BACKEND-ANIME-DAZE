@@ -1,0 +1,299 @@
+{
+  "siteName": "ANIME DAZE",
+  "siteDescription": "منصة البث السينمائية الأولى لعشاق الأنمي في العالم العربي. مكتبة حصرية تجمع بين روائع الجيل الذهبي وأحدث إصدارات الأنمي المترجمة والمدبلجة بجودة فائقة 4K.",
+  "logoUrl": "/site-logo.png",
+  "faviconUrl": "/icon-192x192.png",
+  "currency": "EUR",
+  "socialLinks": {
+    "facebook": "",
+    "twitter": "",
+    "instagram": "",
+    "youtube": "https://www.youtube.com/@MADARA-YT",
+    "telegram": "",
+    "discord": ""
+  },
+  "sliderAnimeIds": [
+    "slam-dunk",
+    "conan"
+  ],
+  "admob": {
+    "isEnabled": false,
+    "appId": "ca-app-pub-3940256099942544~3347511713",
+    "bannerId": "ca-app-pub-3940256099942544/6300978111",
+    "interstitialId": "ca-app-pub-3940256099942544/1033173712",
+    "rewardedId": "ca-app-pub-3940256099942544/5224354917"
+  },
+  "apiApp": {
+    "isMaintenance": false,
+    "maintenanceTitle": "صيانة دورية مجدولة",
+    "maintenanceMessage": "نقوم حالياً بتحسين وتحديث سيرفرات المشاهدة لتوفير تجربة أسرع وأعلى جودة بدون تقطيع. سنعود خلال وقت قصير!",
+    "maintenanceEndTime": "",
+    "devBypassKey": "SLAM_DEV_2026",
+    "latestVersion": "1.2.0",
+    "latestBuild": 14,
+    "minSupportedVersion": "1.0.0",
+    "minSupportedBuild": 10,
+    "forceUpdate": false,
+    "updateUrl": "https://play.google.com/store/apps/details?id=com.animedaze.app",
+    "directApkUrl": "https://slam-dunk-w.vercel.app/downloads/animedaze-latest.apk",
+    "releaseNotes": [
+      "إضافة مكتبة أعمال وكواكب سبيستون والأنمي الكلاسيكي كاملة بدقة FHD",
+      "مشغل فائق السرعة مع دعم سيرفرات متعددة (Mega و Google Drive)",
+      "إمكانية التحميل للمشاهدة أوفلاين بدون إنترنت وبدون إعلانات",
+      "تصميم سينمائي داكن متوافق بالكامل مع الهوية الجديدة لمنصة ANIME DAZE"
+    ],
+    "apiUrl": "https://slam-dunk-w.vercel.app/api/mobile/v1",
+    "apiKey": "slam_live_app_key_2026",
+    "defaultQuality": "1080p",
+    "defaultServer": "Mega",
+    "allowDownloads": true,
+    "interstitialInterval": 2,
+    "appStoreUrl": "https://apps.apple.com/app/animedaze/id123456789",
+    "externalUrl": "https://github.com/ammarnaass/slam-dunk-w/releases"
+  },
+  "maintenanceMode": false,
+  "maintenanceMessage": "التطبيق في وضع الصيانة حالياً لتحسين الخوادم. سنعود قريباً!",
+  "homeConfig": {
+    "sections": [
+      {
+        "id": "heroSlider",
+        "nameAr": "السلايدر السينمائي التفاعلي",
+        "isEnabled": true,
+        "order": 1,
+        "title": "العرض الأكثر رواجاً عالمياً",
+        "subtitle": "شاهد أحدث حلقات الأعمال الملحمية بدقة فائقة 4K",
+        "badgeText": "حصري VIP",
+        "itemLimit": 5,
+        "viewAllLink": "/animes"
+      },
+      {
+        "id": "continueWatching",
+        "nameAr": "شريط استكمال المشاهدة",
+        "isEnabled": true,
+        "order": 2,
+        "title": "استكمل المشاهدة",
+        "subtitle": "تابع من النقطة التي توقفت عندها بالضبط",
+        "badgeText": "تقدم المشاهدة",
+        "itemLimit": 3,
+        "viewAllLink": "/profile?tab=history"
+      },
+      {
+        "id": "planets",
+        "nameAr": "كواكب وعوالم الأنمي",
+        "isEnabled": true,
+        "order": 3,
+        "title": "كواكب الأنمي",
+        "subtitle": "سافر بين عوالم التصنيفات المستوحاة من كواكب الطفولة والخيال",
+        "badgeText": "كواكب سبيستون",
+        "itemLimit": 6,
+        "viewAllLink": "/planets"
+      },
+      {
+        "id": "latestEpisodes",
+        "nameAr": "أحدث الحلقات المضافة (مباشر)",
+        "isEnabled": true,
+        "order": 4,
+        "title": "أحدث الحلقات المضافة",
+        "subtitle": "تحديث فوري فور البث الياباني بدون فواصل إعلانية",
+        "badgeText": "مباشر الآن",
+        "itemLimit": 6,
+        "viewAllLink": "/animes"
+      },
+      {
+        "id": "topTrending",
+        "nameAr": "الأكثر مشاهدة هذا الأسبوع (Top Ranked)",
+        "isEnabled": true,
+        "order": 5,
+        "title": "الأكثر مشاهدة هذا الأسبوع",
+        "subtitle": "أفضل الأعمال التي تتصدر تصويت ومتابعات الجماهير العربية",
+        "badgeText": "توب 10",
+        "itemLimit": 10,
+        "viewAllLink": "/animes"
+      },
+      {
+        "id": "classics",
+        "nameAr": "سبيستون كلاسيك دايز (الجيل الذهبي)",
+        "isEnabled": true,
+        "order": 6,
+        "title": "سبيستون كلاسيك دايز",
+        "subtitle": "ذكريات الزمن الجميل • دبلجة عربية مركز الزهرة الأيقونية",
+        "badgeText": "مركز الزهرة",
+        "itemLimit": 5,
+        "viewAllLink": "/animes?planet=spacetoon"
+      },
+      {
+        "id": "characters",
+        "nameAr": "أبطال وشخصيات الأنمي (الموسوعة)",
+        "isEnabled": true,
+        "order": 7,
+        "title": "أبطال وشخصيات الأنمي",
+        "subtitle": "تعرف على أبطال الأنمي ونخبة فناني الدبلجة",
+        "badgeText": "الموسوعة",
+        "itemLimit": 6,
+        "viewAllLink": "/characters"
+      },
+      {
+        "id": "promoBanner",
+        "nameAr": "بانر الترويج وتطبيق PWA والاشتراكات",
+        "isEnabled": true,
+        "order": 8,
+        "title": "ثبّت تطبيق ANIME DAZE كـ PWA خفيف على هاتفك وشاشتك الذكية",
+        "subtitle": "استمتع بمشاهدة بدون إعلانات نهائياً وسرعة تشغيل فورية",
+        "badgeText": "تطبيق الهاتف",
+        "itemLimit": 1,
+        "viewAllLink": "/pricing"
+      }
+    ],
+    "slider": {
+      "isEnabled": true,
+      "autoplay": true,
+      "intervalSeconds": 7.5,
+      "transitionEffect": "fade",
+      "overlayDarkness": 70,
+      "maxSlides": 5,
+      "showRatingBadge": true,
+      "showQualityBadge": true,
+      "showVipBadge": true,
+      "showEpisodeCount": true,
+      "showGenres": true,
+      "slideAnimeIds": [
+        "slam-dunk",
+        "conan"
+      ]
+    }
+  },
+  "siteNameEn": "ANIME DAZE",
+  "brandColor": "#dc2626",
+  "accentColor": "#ffb95f",
+  "promoBanner": {
+    "isEnabled": true,
+    "badgeText": "تجربة بث سينمائية بدون تقطيع",
+    "badgeIcon": "install_mobile",
+    "title": "ثبّت تطبيق ANIME DAZE كـ PWA خفيف على هاتفك وشاشتك الذكية",
+    "description": "استمتع بمشاهدة بدون إعلانات نهائياً، سرعة تشغيل فورية، تنبيهات عند صدور الحلقات المترجمة في نفس دقيقة نزولها في اليابان، مع إمكانية التحميل للمشاهدة بدون إنترنت.",
+    "features": [
+      {
+        "id": "feat-1",
+        "icon": "block",
+        "text": "صفر إعلانات"
+      },
+      {
+        "id": "feat-2",
+        "icon": "bolt",
+        "text": "مشغل فائق السرعة"
+      },
+      {
+        "id": "feat-3",
+        "icon": "download_for_offline",
+        "text": "تحميل أوفلاين"
+      },
+      {
+        "id": "feat-4",
+        "icon": "notifications_active",
+        "text": "تنبيهات فورية"
+      }
+    ],
+    "primaryButtonText": "ترقية إلى VIP بخصم 40%",
+    "primaryButtonLink": "/pricing",
+    "primaryButtonIcon": "diamond",
+    "secondaryButtonText": "تصفح المكتبة المجانية",
+    "secondaryButtonLink": "/animes",
+    "imageUrl": "/hero-bg.jpg",
+    "imageCaption": "تجربة سبيستون الكلاسيكية الحديثة",
+    "appIconUrl": "/icon-192x192.png"
+  },
+  "footer": {
+    "subtitle": "سبيس تون & أنمي كلاسيك",
+    "description": "منصة البث السينمائية الأولى لعشاق الأنمي في العالم العربي. مكتبة حصرية تجمع بين روائع الجيل الذهبي وأحدث إصدارات الأنمي المترجمة والمدبلجة بجودة فائقة 4K.",
+    "socialLinks": [
+      {
+        "id": "yt",
+        "name": "يوتيوب",
+        "icon": "play_circle",
+        "url": "https://youtube.com",
+        "isEnabled": true
+      },
+      {
+        "id": "tg",
+        "name": "تيليغرام",
+        "icon": "send",
+        "url": "https://t.me",
+        "isEnabled": true
+      },
+      {
+        "id": "dc",
+        "name": "ديسكورد",
+        "icon": "forum",
+        "url": "https://discord.com",
+        "isEnabled": true
+      },
+      {
+        "id": "pod",
+        "name": "بودكاست",
+        "icon": "podcasts",
+        "url": "#",
+        "isEnabled": true
+      }
+    ],
+    "exploreTitle": "استكشف المنصة",
+    "exploreLinks": [
+      {
+        "id": "exp-1",
+        "label": "أحدث الحلقات المضافة",
+        "href": "/animes"
+      },
+      {
+        "id": "exp-2",
+        "label": "كواكب الأكشن والمغامرة",
+        "href": "/planets?planet=action"
+      },
+      {
+        "id": "exp-3",
+        "label": "كواكب الأنمي وسبيستون",
+        "href": "/planets"
+      },
+      {
+        "id": "exp-4",
+        "label": "مكتبة ومواسم الأنمي",
+        "href": "/animes"
+      },
+      {
+        "id": "exp-5",
+        "label": "اشتراكات الدايزر VIP",
+        "href": "/pricing",
+        "isVip": true
+      }
+    ],
+    "helpTitle": "المساعدة والدعم",
+    "helpLinks": [
+      {
+        "id": "hlp-1",
+        "label": "مركز المساعدة والأسئلة الشائعة",
+        "href": "/terms"
+      },
+      {
+        "id": "hlp-2",
+        "label": "الأجهزة المدعومة (Smart TV)",
+        "href": "/terms"
+      },
+      {
+        "id": "hlp-3",
+        "label": "شروط الاستخدام والخصوصية",
+        "href": "/terms"
+      },
+      {
+        "id": "hlp-4",
+        "label": "تواصل مع فريق الدعم",
+        "href": "/terms"
+      }
+    ],
+    "appCardTitle": "تطبيق ANIME DAZE",
+    "appCardDescription": "ثبّت التطبيق الآن على جهازك واستمتع بالمشاهدة بلا انقطاع وبدون اتصال بالإنترنت وتجربة شاشة كاملة.",
+    "appCardButtonText": "تثبيت التطبيق (PWA)",
+    "appCardButtonIcon": "download",
+    "isAppCardEnabled": true,
+    "copyrightText": "جميع الحقوق محفوظة لروائع الرسوم المتحركة وعشاق الأنمي في العالم العربي.",
+    "serverStatusText": "خوادم البث المباشر نشطة ومستقرة",
+    "isStatusIndicatorActive": true
+  }
+}

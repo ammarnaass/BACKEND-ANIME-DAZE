@@ -5214,6 +5214,19 @@ animesRoutes.get("/:id", async (c) => {
     return sendError(c, "FETCH_ERROR", error.message || "\u0641\u0634\u0644 \u062C\u0644\u0628 \u062A\u0641\u0627\u0635\u064A\u0644 \u0627\u0644\u0639\u0645\u0644", 500);
   }
 });
+animesRoutes.get("/:id/episodes", async (c) => {
+  try {
+    const id = c.req.param("id");
+    const episodes = await prisma.episode.findMany({
+      where: { animeId: id },
+      orderBy: { episodeNumber: "asc" },
+      include: { servers: true }
+    });
+    return sendSuccess(c, episodes);
+  } catch (error) {
+    return sendError(c, "FETCH_ERROR", error.message || "\u0641\u0634\u0644 \u062C\u0644\u0628 \u0642\u0627\u0626\u0645\u0629 \u0627\u0644\u062D\u0644\u0642\u0627\u062A", 500);
+  }
+});
 animesRoutes.get("/characters/all", async (c) => {
   try {
     const team = c.req.query("team");
@@ -5525,12 +5538,2457 @@ meRoutes.get("/history", async (c) => {
   }
 });
 
+// src/data/episodes.json
+var episodes_default = [
+  {
+    id: "1",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 1",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 1 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 1,
+    episodeNumber: 1,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/tmRgHIwT#IxstEywcSnPbylNPbfVaSQr69lcvIkRNgxTxKzAn_S0",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-1",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/tmRgHIwT#IxstEywcSnPbylNPbfVaSQr69lcvIkRNgxTxKzAn_S0",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "2",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 2",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 2 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 2,
+    episodeNumber: 2,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/ZjoFTaTT#ZyyP7paDKzr5QXRsOzVBthjzwZSQasCZX-4yRyZoBM0",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-2",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/ZjoFTaTT#ZyyP7paDKzr5QXRsOzVBthjzwZSQasCZX-4yRyZoBM0",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "3",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 3",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 3 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 3,
+    episodeNumber: 3,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/wjBHVKJA#gpKXfah_5Yge8QIQ59CV4m6V9uhaMYk9mik85rTay4s",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-3",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/wjBHVKJA#gpKXfah_5Yge8QIQ59CV4m6V9uhaMYk9mik85rTay4s",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "4",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 4",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 4 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 4,
+    episodeNumber: 4,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/Qn5EGYya#9n2kaK3gDv1mGsoJyKW7e0NbeMmUBriJ6QAUFBsls2w",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-4",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/Qn5EGYya#9n2kaK3gDv1mGsoJyKW7e0NbeMmUBriJ6QAUFBsls2w",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "5",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 5",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 5 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 5,
+    episodeNumber: 5,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/5q4E3I6b#mIYyPSNX4n0Ae0A85P0ubpRL9OWK_dJlbahhYGi8ZFk",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-5",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/5q4E3I6b#mIYyPSNX4n0Ae0A85P0ubpRL9OWK_dJlbahhYGi8ZFk",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "6",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 6",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 6 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 6,
+    episodeNumber: 6,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/8rx0QQKC#UV5FvrkftoCoMjO3nkcanLOPdFv010loXpPuwFZRspc",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-6",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/8rx0QQKC#UV5FvrkftoCoMjO3nkcanLOPdFv010loXpPuwFZRspc",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "7",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 7",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 7 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 7,
+    episodeNumber: 7,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/guxDyZSa#gRHULWjE2jK7f0dOsJaZy6tZNlaorCFMCGtu5qaSn0E",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-7",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/guxDyZSa#gRHULWjE2jK7f0dOsJaZy6tZNlaorCFMCGtu5qaSn0E",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "8",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 8",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 8 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 8,
+    episodeNumber: 8,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/8jpzmapY#r5xEkzW-3Bcc5j1RGbl7PRM1UzFNIurdxn7Nz5NTHWg",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-8",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/8jpzmapY#r5xEkzW-3Bcc5j1RGbl7PRM1UzFNIurdxn7Nz5NTHWg",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "9",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 9",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 9 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 9,
+    episodeNumber: 9,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/V34zkKIL#lhfjEWI6erbvKREOd7diUjjZ5J0-LRJrufprv56tyK0",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-9",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/V34zkKIL#lhfjEWI6erbvKREOd7diUjjZ5J0-LRJrufprv56tyK0",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "10",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 10",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 10 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 10,
+    episodeNumber: 10,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/Qy5VQBAS#yFRpPA3awM55htlrDwKerGqdyXOQxWjP91lgUc8zyPc",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-10",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/Qy5VQBAS#yFRpPA3awM55htlrDwKerGqdyXOQxWjP91lgUc8zyPc",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "11",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 11",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 11 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 11,
+    episodeNumber: 11,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/QnxTmTwJ#z5-p2_a9UWlss56HmX9eaLnbs_TUe7WMb0T797KpS3U",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-11",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/QnxTmTwJ#z5-p2_a9UWlss56HmX9eaLnbs_TUe7WMb0T797KpS3U",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "12",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 12",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 12 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 12,
+    episodeNumber: 12,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/hrR0BYAC#fg9oqiQQ_EJ_r0aGyswAOFxPMYbCPS6IfAFadFOQtVs",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-12",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/hrR0BYAC#fg9oqiQQ_EJ_r0aGyswAOFxPMYbCPS6IfAFadFOQtVs",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "13",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 13",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 13 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 13,
+    episodeNumber: 13,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/xqpFXLDA#3o7V5tsNIOa0NOYxyxDQ6Y6Y3P1KLNXmkI-SDUuet04",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-13",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/xqpFXLDA#3o7V5tsNIOa0NOYxyxDQ6Y6Y3P1KLNXmkI-SDUuet04",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "14",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 14",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 14 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 14,
+    episodeNumber: 14,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/lnwjCBgI#i2Bt5p6vj48Lxr4G_vHEoSVr0LbPmJKjM8mqLRnEKts",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-14",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/lnwjCBgI#i2Bt5p6vj48Lxr4G_vHEoSVr0LbPmJKjM8mqLRnEKts",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "15",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 15",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 15 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 15,
+    episodeNumber: 15,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/9v4XQCjT#3P-W6DTLqBZI8-BHEUZrQAkBlTllSz9VEx1XnCJSxUQ",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-15",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/9v4XQCjT#3P-W6DTLqBZI8-BHEUZrQAkBlTllSz9VEx1XnCJSxUQ",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "16",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 16",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 16 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 16,
+    episodeNumber: 16,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/8ixnlQ4D#Ex28_5s_WEJdxAzaiJVzpla2cp0wSdL3yJVp_EvjxNE",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-16",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/8ixnlQ4D#Ex28_5s_WEJdxAzaiJVzpla2cp0wSdL3yJVp_EvjxNE",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "17",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 17",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 17 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 17,
+    episodeNumber: 17,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/tvoFXYzT#C08W7T7RAnawqSOMCeCn880UUSCL0qb2_GIdhtx8srU",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-17",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/tvoFXYzT#C08W7T7RAnawqSOMCeCn880UUSCL0qb2_GIdhtx8srU",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "19",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 19",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 19 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 19,
+    episodeNumber: 19,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/QvZWiSSR#dl989tTaI1q5uLpdnns8P25tnBCkXB-75qXXyqyvj20",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-19",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/QvZWiSSR#dl989tTaI1q5uLpdnns8P25tnBCkXB-75qXXyqyvj20",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "20",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 20",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 20 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 20,
+    episodeNumber: 20,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/I6I2ESwC#3h9Xet4rZ8XJoy_W82hq3KQyCsG7I3oFqed7kNO28xY",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-20",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/I6I2ESwC#3h9Xet4rZ8XJoy_W82hq3KQyCsG7I3oFqed7kNO28xY",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "21",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 21",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 21 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 21,
+    episodeNumber: 21,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/RqJyWChJ#LcASwHiDMazxMIplblDN6NoZu1WgE042TIJ1jyy0mOg",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-21",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/RqJyWChJ#LcASwHiDMazxMIplblDN6NoZu1WgE042TIJ1jyy0mOg",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "22",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 22",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 22 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 22,
+    episodeNumber: 22,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/4yozCa5J#Lwuquulm49ndPqJDno9SQ27IGQEo5uIO1sor2rud4sM",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-22",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/4yozCa5J#Lwuquulm49ndPqJDno9SQ27IGQEo5uIO1sor2rud4sM",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "23",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 23",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 23 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 23,
+    episodeNumber: 23,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/17wTwQrD#wF0tL7_IYorpmSqkfdj1U7NISDJK3SXJJmpgkaMzlRA",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-23",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/17wTwQrD#wF0tL7_IYorpmSqkfdj1U7NISDJK3SXJJmpgkaMzlRA",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "24",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 24",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 24 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 24,
+    episodeNumber: 24,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/A7p3hYJZ#4SBLwrim_wfQTU33YT2TaHmJ0XfWm34OEi-FenTfokE",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-24",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/A7p3hYJZ#4SBLwrim_wfQTU33YT2TaHmJ0XfWm34OEi-FenTfokE",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "25",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 25",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 25 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 25,
+    episodeNumber: 25,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/02hR2QgR#SOJJ1m7gobJH_q4pzN9SJfm29-FKkcpFcHhHueaS2Zg",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-25",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/02hR2QgR#SOJJ1m7gobJH_q4pzN9SJfm29-FKkcpFcHhHueaS2Zg",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "26",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 26",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 26 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 26,
+    episodeNumber: 26,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/onhzUYpR#244oeOd1TeOLRJUnOTbgD7H0Z5Q4IlUolOhNsNkwu4s",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-26",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/onhzUYpR#244oeOd1TeOLRJUnOTbgD7H0Z5Q4IlUolOhNsNkwu4s",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "27",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 27",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 27 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 27,
+    episodeNumber: 27,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/cy4l2YjA#JyFB3cZXu6YFj7uKIFUhKScK5wX-wouHLl3oqpAEn6c",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-27",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/cy4l2YjA#JyFB3cZXu6YFj7uKIFUhKScK5wX-wouHLl3oqpAEn6c",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "28",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 28",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 28 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 28,
+    episodeNumber: 28,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/Qv513I5D#75loKLT9r5jJZRXb7rECi5vpoI7mjoiX9KvooZm7dwA",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-28",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/Qv513I5D#75loKLT9r5jJZRXb7rECi5vpoI7mjoiX9KvooZm7dwA",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "29",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 29",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 29 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 29,
+    episodeNumber: 29,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/1vAjXayb#dRHhMe3_qwjyUJn1yaht28JDtmRt92RvbgjWTS9YBqs",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-29",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/1vAjXayb#dRHhMe3_qwjyUJn1yaht28JDtmRt92RvbgjWTS9YBqs",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "30",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 30",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 30 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 30,
+    episodeNumber: 30,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/FqB1XIwK#6fCZj38usInTxQya8diGln9NKVr5kT20DNX1WEOTwFQ",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-30",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/FqB1XIwK#6fCZj38usInTxQya8diGln9NKVr5kT20DNX1WEOTwFQ",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "31",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 31",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 31 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 31,
+    episodeNumber: 31,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/J7IHTYqJ#vRI3XqY7xYv4bj6ycYMQQFxz4IkzeiCvgZo1Lfkhhp8",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-31",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/J7IHTYqJ#vRI3XqY7xYv4bj6ycYMQQFxz4IkzeiCvgZo1Lfkhhp8",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "32",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 32",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 32 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 32,
+    episodeNumber: 32,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/pipSiQJY#1I4wZ5miQr7wNzX28TmrbHCPJTTLGZDlwp2PYnDhsTk",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-32",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/pipSiQJY#1I4wZ5miQr7wNzX28TmrbHCPJTTLGZDlwp2PYnDhsTk",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "33",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 33",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 33 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 33,
+    episodeNumber: 33,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/J7R2UASJ#QNxQde57AjpXw7Q5IR97jRH5dVZHh9_iRORb5aQhytI",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-33",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/J7R2UASJ#QNxQde57AjpXw7Q5IR97jRH5dVZHh9_iRORb5aQhytI",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "34",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 34",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 34 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 34,
+    episodeNumber: 34,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/l3pQVC6Y#eqZ0xz7wjHp_lt683j3_QYFTCp4rLTNxL0KcXqCC9Mg",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-34",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/l3pQVC6Y#eqZ0xz7wjHp_lt683j3_QYFTCp4rLTNxL0KcXqCC9Mg",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "35",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 35",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 35 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 35,
+    episodeNumber: 35,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/kqxi0IoQ#5OjVanwuooAOQq9Jj1v8oeg1iYoXRBktRdhQluxgkE4",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-35",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/kqxi0IoQ#5OjVanwuooAOQq9Jj1v8oeg1iYoXRBktRdhQluxgkE4",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "36",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 36",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 36 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 36,
+    episodeNumber: 36,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/xmBTnITR#NjwYu1tJ7eot1MFIQcUOcoNxUJXlLLrxUwyNNxf1Ff0",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-36",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/xmBTnITR#NjwYu1tJ7eot1MFIQcUOcoNxUJXlLLrxUwyNNxf1Ff0",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "37",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 37",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 37 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 37,
+    episodeNumber: 37,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/wrYRxChb#LjAO5cQgCu4rG0k-ib2zvKJRWThFPpMaibkbDo9zAwk",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-37",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/wrYRxChb#LjAO5cQgCu4rG0k-ib2zvKJRWThFPpMaibkbDo9zAwk",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "38",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 38",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 38 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 38,
+    episodeNumber: 38,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/9yxE1BQS#vZGw8ynSCuo-ep6DsMQiZXamUlGOFmTANxzGrhe9oZM",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-38",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/9yxE1BQS#vZGw8ynSCuo-ep6DsMQiZXamUlGOFmTANxzGrhe9oZM",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "39",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 39",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 39 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 39,
+    episodeNumber: 39,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/cyhBkJLD#JijlDLBS7ucBpt-vMp8bo8k8eu1ualcAyajTW09KKxc",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-39",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/cyhBkJLD#JijlDLBS7ucBpt-vMp8bo8k8eu1ualcAyajTW09KKxc",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "40",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 40",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 40 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 40,
+    episodeNumber: 40,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/p35gHJZB#ssX1T0Sui_-3jZFFkh840IlQ57nN5MP3meUkc7fNjdE",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-40",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/p35gHJZB#ssX1T0Sui_-3jZFFkh840IlQ57nN5MP3meUkc7fNjdE",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "41",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 41",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 41 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 41,
+    episodeNumber: 41,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/wmo2WD6Z#i6GCKF_ngjFxvmy29TR_MSZSkQeqAkZc8_qzpzu6eOQ",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-41",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/wmo2WD6Z#i6GCKF_ngjFxvmy29TR_MSZSkQeqAkZc8_qzpzu6eOQ",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "42",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 42",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 42 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 42,
+    episodeNumber: 42,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/FmIjET7K#Sy7WPnHHfgUygnrUDj7za1uYKn8JvuSl1TDGgdTEf-E",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-42",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/FmIjET7K#Sy7WPnHHfgUygnrUDj7za1uYKn8JvuSl1TDGgdTEf-E",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "43",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 43",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 43 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 43,
+    episodeNumber: 43,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/YjwVjJDK#k-xjp7gqvDYH67q0aWGELw1bihn-qISNuQI7XFcVfb4",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-43",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/YjwVjJDK#k-xjp7gqvDYH67q0aWGELw1bihn-qISNuQI7XFcVfb4",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "44",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 44",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 44 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 44,
+    episodeNumber: 44,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/8uBHSSbB#vQp-wq_5oN82JR4fJOdNDHdE_8DEaxPCi6f_Nc_7PHM",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-44",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/8uBHSSbB#vQp-wq_5oN82JR4fJOdNDHdE_8DEaxPCi6f_Nc_7PHM",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "45",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 45",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 45 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 45,
+    episodeNumber: 45,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/F65j0Ixa#SpFi0PEAgfJRKsEosuCJejNVKpWdAsn7bIQ9iqpDLKA",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-45",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/F65j0Ixa#SpFi0PEAgfJRKsEosuCJejNVKpWdAsn7bIQ9iqpDLKA",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "46",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 46",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 46 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 46,
+    episodeNumber: 46,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/kuQUUBwK#u3bMELL2O-p4BD4MJPod87J69JP_xED_BR47IlxMjmQ",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-46",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/kuQUUBwK#u3bMELL2O-p4BD4MJPod87J69JP_xED_BR47IlxMjmQ",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "47",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 47",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 47 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 47,
+    episodeNumber: 47,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/RzJSiJ6T#mB2i_KgCSsWVacHBu71NeuFKG5-R4f7RoIt3RH8ACZg",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-47",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/RzJSiJ6T#mB2i_KgCSsWVacHBu71NeuFKG5-R4f7RoIt3RH8ACZg",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "48",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 48",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 48 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 48,
+    episodeNumber: 48,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/0qpTmaqT#pjzdsMF9Od1LOtkDArJLd0cPFNOVO5XaFC95V4pKMBM",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-48",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/0qpTmaqT#pjzdsMF9Od1LOtkDArJLd0cPFNOVO5XaFC95V4pKMBM",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "49",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 49",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 49 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 49,
+    episodeNumber: 49,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/ZnYgRSwL#JPZ8X7Qnh4e2yMxyMTdzPA86zCV8Fk0sShVwUzv_mvI",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-49",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/ZnYgRSwL#JPZ8X7Qnh4e2yMxyMTdzPA86zCV8Fk0sShVwUzv_mvI",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "50",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 50",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 50 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 50,
+    episodeNumber: 50,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/ZuYhzTqb#vRdzOBBWyVmOIJNJpK8CAA_Ig30sxPy3i4onh9HNUJE",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-50",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/ZuYhzTqb#vRdzOBBWyVmOIJNJpK8CAA_Ig30sxPy3i4onh9HNUJE",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "51",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 51",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 51 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 51,
+    episodeNumber: 51,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/8v5SiTTA#yG5aLtoJSKuVoDJ9QerTA97xgWuGWYosrRzB5ipLOAc",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-51",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/8v5SiTTA#yG5aLtoJSKuVoDJ9QerTA97xgWuGWYosrRzB5ipLOAc",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "52",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 52",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 52 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 52,
+    episodeNumber: 52,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/BiZTDRiI#DOqlNq6Tw_UZHmGfduCfQJqYwtHqBwJ__X1V2HeWhww",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-52",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/BiZTDRiI#DOqlNq6Tw_UZHmGfduCfQJqYwtHqBwJ__X1V2HeWhww",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "53",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 53",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 53 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 53,
+    episodeNumber: 53,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/0zABARLb#9LvQ2B-VhKgvN2ycVzU2RX3jFSFkLx6cFKOYqms0r10",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-53",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/0zABARLb#9LvQ2B-VhKgvN2ycVzU2RX3jFSFkLx6cFKOYqms0r10",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "54",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 54",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 54 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 54,
+    episodeNumber: 54,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/Yro2EBrI#Su_78_O5ndU2ckQtq89q6V5tMQ9lp901ldGZU5z2olo",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-54",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/Yro2EBrI#Su_78_O5ndU2ckQtq89q6V5tMQ9lp901ldGZU5z2olo",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "55",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 55",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 55 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 55,
+    episodeNumber: 55,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/wvphkB7S#3XLYhq-2VHIyKo6pnd7eAotKCcGvURv10t9XAwq2q5I",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-55",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/wvphkB7S#3XLYhq-2VHIyKo6pnd7eAotKCcGvURv10t9XAwq2q5I",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "56",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 56",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 56 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 56,
+    episodeNumber: 56,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/5vYBgRaY#ZwKjxQkdpSt1Pg1_yzTqWO6NfOfykG_bcWyallzew4k",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-56",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/5vYBgRaY#ZwKjxQkdpSt1Pg1_yzTqWO6NfOfykG_bcWyallzew4k",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "57",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 57",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 57 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 57,
+    episodeNumber: 57,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/wr4jzboC#j6Ef2kCxmcpbd9EY4uEv3fpTiR6eFoiMWXwJhgGNcYw",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-57",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/wr4jzboC#j6Ef2kCxmcpbd9EY4uEv3fpTiR6eFoiMWXwJhgGNcYw",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "58",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 58",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 58 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 58,
+    episodeNumber: 58,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/ku4yhSQB#lPe5RHQPbCIUg-a-3Kwzd218ct5YaEUdGj2I3McRkbY",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-58",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/ku4yhSQB#lPe5RHQPbCIUg-a-3Kwzd218ct5YaEUdGj2I3McRkbY",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "59",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 59",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 59 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 59,
+    episodeNumber: 59,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/Y24GjQiJ#V02jglRqqev_mXvcZOyLNUzqTiDaSkc1g3SKwUmO9v8",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-59",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/Y24GjQiJ#V02jglRqqev_mXvcZOyLNUzqTiDaSkc1g3SKwUmO9v8",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "60",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 60",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 60 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 1,
+    seasonNumber: 1,
+    episode_number: 60,
+    episodeNumber: 60,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/9uYxlZYa#-mAH6YKZNbVhiCz8HhRxuLcHMhmtEXgBHNK0_NIZvtg",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-60",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/9uYxlZYa#-mAH6YKZNbVhiCz8HhRxuLcHMhmtEXgBHNK0_NIZvtg",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "61",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 61",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 61 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 2,
+    seasonNumber: 2,
+    episode_number: 61,
+    episodeNumber: 61,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/FqgjnQKB#YKqtkbyJps5upobKHERDORXwGgTLRtvkSGSlIaCoIkw",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-61",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/FqgjnQKB#YKqtkbyJps5upobKHERDORXwGgTLRtvkSGSlIaCoIkw",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "62",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 62",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 62 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 2,
+    seasonNumber: 2,
+    episode_number: 62,
+    episodeNumber: 62,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/guoGnI7Z#JxualpQn9-zXrHZxgGi8HrKGbG0ItQFCdx79jb9X-zs",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-62",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/guoGnI7Z#JxualpQn9-zXrHZxgGi8HrKGbG0ItQFCdx79jb9X-zs",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "63",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 63",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 63 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 2,
+    seasonNumber: 2,
+    episode_number: 63,
+    episodeNumber: 63,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/k24lmbRI#_RxoaG7V41uTcOdbkwYNav2fwwZK6EgKBmcODL78Azg",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-63",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/k24lmbRI#_RxoaG7V41uTcOdbkwYNav2fwwZK6EgKBmcODL78Azg",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "64",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 64",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 64 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 2,
+    seasonNumber: 2,
+    episode_number: 64,
+    episodeNumber: 64,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/AzI1gRAK#Hfsw0rEDQaCJHyF9zpnhfIxWJQ4x_nvOsowTL2oLZtI",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-64",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/AzI1gRAK#Hfsw0rEDQaCJHyF9zpnhfIxWJQ4x_nvOsowTL2oLZtI",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "65",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 65",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 65 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 2,
+    seasonNumber: 2,
+    episode_number: 65,
+    episodeNumber: 65,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/wmw0ESzR#JEdAUdMlrzZkLZyKA-Dq-ynE9iiN70QkpJz-U82PvlU",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-65",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/wmw0ESzR#JEdAUdMlrzZkLZyKA-Dq-ynE9iiN70QkpJz-U82PvlU",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "66",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 66",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 66 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 2,
+    seasonNumber: 2,
+    episode_number: 66,
+    episodeNumber: 66,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/YvoRHYTZ#iAzjBhnts_ulZTb6KiYKn4_NFsWQ2L-dATHzMxOkKRM",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-66",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/YvoRHYTZ#iAzjBhnts_ulZTb6KiYKn4_NFsWQ2L-dATHzMxOkKRM",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "67",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 67",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 67 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 2,
+    seasonNumber: 2,
+    episode_number: 67,
+    episodeNumber: 67,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/d7BHnYRJ#8z933mE0j80tRnVnRiDR-nr6_Cej7-cUVGwSwDJMVw8",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-67",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/d7BHnYRJ#8z933mE0j80tRnVnRiDR-nr6_Cej7-cUVGwSwDJMVw8",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "68",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 68",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 68 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 2,
+    seasonNumber: 2,
+    episode_number: 68,
+    episodeNumber: 68,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/hjgCxbID#T_xNYpBgqHhXuIoXdaPurYYFAaQf-kK01WCJAKu5czA",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-68",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/hjgCxbID#T_xNYpBgqHhXuIoXdaPurYYFAaQf-kK01WCJAKu5czA",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "69",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 69",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 69 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 2,
+    seasonNumber: 2,
+    episode_number: 69,
+    episodeNumber: 69,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/wyIT2Dha#FF6YSR8nd7S1CziGsJe4HnFWuxnmxwgBZadmioQh8AU",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-69",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/wyIT2Dha#FF6YSR8nd7S1CziGsJe4HnFWuxnmxwgBZadmioQh8AU",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "70",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 70",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 70 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 2,
+    seasonNumber: 2,
+    episode_number: 70,
+    episodeNumber: 70,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/cmwlESSC#Ad3JtBNklqvKWcMMsFRKyAbhyL3gMYNeZMvpP0hTYjI",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-70",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/cmwlESSC#Ad3JtBNklqvKWcMMsFRKyAbhyL3gMYNeZMvpP0hTYjI",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "71",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 71",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 71 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 2,
+    seasonNumber: 2,
+    episode_number: 71,
+    episodeNumber: 71,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/M7YWWSzR#5pGjnzZiGQcVOB3Oqy6hAhFm6U0MCQpO4f1DExwohRU",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-71",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/M7YWWSzR#5pGjnzZiGQcVOB3Oqy6hAhFm6U0MCQpO4f1DExwohRU",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "72",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 72",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 72 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 2,
+    seasonNumber: 2,
+    episode_number: 72,
+    episodeNumber: 72,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/VnoQULAb#bSONXD9zgnY2xRvt87JxpzmaomlSW27Fr7mMXQuY524",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-72",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/VnoQULAb#bSONXD9zgnY2xRvt87JxpzmaomlSW27Fr7mMXQuY524",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "73",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 73",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 73 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 2,
+    seasonNumber: 2,
+    episode_number: 73,
+    episodeNumber: 73,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/cm52lSJQ#Vvk7N3Ketf31S4qjOQPzQItpWNJqBJhtVLum6GgEQVU",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-73",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/cm52lSJQ#Vvk7N3Ketf31S4qjOQPzQItpWNJqBJhtVLum6GgEQVU",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "74",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 74",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 74 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 2,
+    seasonNumber: 2,
+    episode_number: 74,
+    episodeNumber: 74,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/guBX3b7Z#bB9EsQgnCRibZ9fObnJGBK3R-1QJDP76A81zY3Br8G4",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-74",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/guBX3b7Z#bB9EsQgnCRibZ9fObnJGBK3R-1QJDP76A81zY3Br8G4",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "75",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 75",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 75 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 2,
+    seasonNumber: 2,
+    episode_number: 75,
+    episodeNumber: 75,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/V7RB2CrR#w_kWnOyYXYpI0yFcgGC-JzOSFjJYN6_u1tBMqSO7QPk",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-75",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/V7RB2CrR#w_kWnOyYXYpI0yFcgGC-JzOSFjJYN6_u1tBMqSO7QPk",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "76",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 76",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 76 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 2,
+    seasonNumber: 2,
+    episode_number: 76,
+    episodeNumber: 76,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/I742hYQJ#hnGJN0sT1G4H_PQ_cEJNHxIN7TaYWCzdGPsTJeRKBiE",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-76",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/I742hYQJ#hnGJN0sT1G4H_PQ_cEJNHxIN7TaYWCzdGPsTJeRKBiE",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "77",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 77",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 77 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 2,
+    seasonNumber: 2,
+    episode_number: 77,
+    episodeNumber: 77,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/giwxmRYT#ddBBw0qy_pA5PZ4_-4UAyz1pw-eV15HBvjzR_JvTXpM",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-77",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/giwxmRYT#ddBBw0qy_pA5PZ4_-4UAyz1pw-eV15HBvjzR_JvTXpM",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "78",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 78",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 78 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 2,
+    seasonNumber: 2,
+    episode_number: 78,
+    episodeNumber: 78,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/gihmAYqZ#EWO52OacyWVpxdtcndfu9EWN29ld5flxsMLffGHuyf0",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-78",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/gihmAYqZ#EWO52OacyWVpxdtcndfu9EWN29ld5flxsMLffGHuyf0",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "79",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 79",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 79 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 2,
+    seasonNumber: 2,
+    episode_number: 79,
+    episodeNumber: 79,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/9nhWGD4Q#1aBilE-3gtH3LgzAr2EfRWzzyBeqFpm-85JBtwq_rvw",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-79",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/9nhWGD4Q#1aBilE-3gtH3LgzAr2EfRWzzyBeqFpm-85JBtwq_rvw",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "80",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 80",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 80 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 2,
+    seasonNumber: 2,
+    episode_number: 80,
+    episodeNumber: 80,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/cvIHVYRA#Nbcdi83T20oTFTOLskK9aPvJPVqrncI20smJswQfpYc2",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-80",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/cvIHVYRA#Nbcdi83T20oTFTOLskK9aPvJPVqrncI20smJswQfpYc2",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "81",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 81",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 81 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 2,
+    seasonNumber: 2,
+    episode_number: 81,
+    episodeNumber: 81,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/xvBlyLhL#Io9QuvHetVf4NHUqNrxXdXJoXfLFSjeopLZJX-AoDxw",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-81",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/xvBlyLhL#Io9QuvHetVf4NHUqNrxXdXJoXfLFSjeopLZJX-AoDxw",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "82",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 82",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 82 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 2,
+    seasonNumber: 2,
+    episode_number: 82,
+    episodeNumber: 82,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/VrozUA6Y#k8zeqAcmiN2M67nDwK4lK_2xzfCzkaR6adJ-8Oqpa_A",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-82",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/VrozUA6Y#k8zeqAcmiN2M67nDwK4lK_2xzfCzkaR6adJ-8Oqpa_A",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "83",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 83",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 83 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 2,
+    seasonNumber: 2,
+    episode_number: 83,
+    episodeNumber: 83,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/4yRjgYLJ#7UTGbSxz9elRArjGPSbeJZj9TFZCPTBjXbX8aq6dgUQ",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-83",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/4yRjgYLJ#7UTGbSxz9elRArjGPSbeJZj9TFZCPTBjXbX8aq6dgUQ",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "84",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 84",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 84 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 2,
+    seasonNumber: 2,
+    episode_number: 84,
+    episodeNumber: 84,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/drQUAaoA#nSHqb0BMSCnBPDHDn_bieS4lRtheAdLiK1o7TeApG2c",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-84",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/drQUAaoA#nSHqb0BMSCnBPDHDn_bieS4lRtheAdLiK1o7TeApG2c",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "85",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 85",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 85 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 2,
+    seasonNumber: 2,
+    episode_number: 85,
+    episodeNumber: 85,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/kromSDSK#clF3XgCN-OyUHSw47-3GkyzgEMKKb0MAivVts32zrcg",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-85",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/kromSDSK#clF3XgCN-OyUHSw47-3GkyzgEMKKb0MAivVts32zrcg",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "86",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 86",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 86 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 2,
+    seasonNumber: 2,
+    episode_number: 86,
+    episodeNumber: 86,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/ZiIhCDKA#-hF1Deeb7JkLSUBK9GS0AwoFWIu7moRLVPW2OUe8o3Y",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-86",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/ZiIhCDKA#-hF1Deeb7JkLSUBK9GS0AwoFWIu7moRLVPW2OUe8o3Y",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "87",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 87",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 87 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 2,
+    seasonNumber: 2,
+    episode_number: 87,
+    episodeNumber: 87,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/tz4HRDyD#-dCzcmUle5PH0E2mb3djqZ2QA9uhySltFC3YE84lvo8",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-87",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/tz4HRDyD#-dCzcmUle5PH0E2mb3djqZ2QA9uhySltFC3YE84lvo8",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "88",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 88",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 88 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 2,
+    seasonNumber: 2,
+    episode_number: 88,
+    episodeNumber: 88,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/t7AWCRgY#kaLENkP_Fvo4Mi0oypHHWVeHlHNJ5W9UXaQpAFqu_YI",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-88",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/t7AWCRgY#kaLENkP_Fvo4Mi0oypHHWVeHlHNJ5W9UXaQpAFqu_YI",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "89",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 89",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 89 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 2,
+    seasonNumber: 2,
+    episode_number: 89,
+    episodeNumber: 89,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/t7IE0agK#05v0GC28C9_28Rkz0Sk-3yPcvp-DKAg9YxyTrW2KCNA",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-89",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/t7IE0agK#05v0GC28C9_28Rkz0Sk-3yPcvp-DKAg9YxyTrW2KCNA",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "90",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 90",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 90 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 2,
+    seasonNumber: 2,
+    episode_number: 90,
+    episodeNumber: 90,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/4uYX3SQJ#D2EIxuwJ-2yXLnVp9Uh8INuN3PnLGC9x1Oe1lXZh7a8",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-90",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/4uYX3SQJ#D2EIxuwJ-2yXLnVp9Uh8INuN3PnLGC9x1Oe1lXZh7a8",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "91",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 91",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 91 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 2,
+    seasonNumber: 2,
+    episode_number: 91,
+    episodeNumber: 91,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/9qI1mZpL#rKOeQ3EQstgHLNo7XWhatv6rOwoK1qb2c3T9p1kYtVA",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-91",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/9qI1mZpL#rKOeQ3EQstgHLNo7XWhatv6rOwoK1qb2c3T9p1kYtVA",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "92",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 92",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 92 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 2,
+    seasonNumber: 2,
+    episode_number: 92,
+    episodeNumber: 92,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/wzpBXQwD#W8OCjygOpr0hN3m0IjuEgm52w-dDrSWhh31hszac2ak",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-92",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/wzpBXQwD#W8OCjygOpr0hN3m0IjuEgm52w-dDrSWhh31hszac2ak",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "93",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 93",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 93 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 2,
+    seasonNumber: 2,
+    episode_number: 93,
+    episodeNumber: 93,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/1uoX1aZZ#k3jQE-p5HcjY1aTKbzj1pGnZlwkZpYM2ojWvnSIKPX4",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-93",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/1uoX1aZZ#k3jQE-p5HcjY1aTKbzj1pGnZlwkZpYM2ojWvnSIKPX4",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "94",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 94",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 94 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 2,
+    seasonNumber: 2,
+    episode_number: 94,
+    episodeNumber: 94,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/QyxmEa7b#SWkk3JIbvTuApS9pA8CmJeSeUrwwkfYIrR3QwQ1an9c",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-94",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/QyxmEa7b#SWkk3JIbvTuApS9pA8CmJeSeUrwwkfYIrR3QwQ1an9c",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "95",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 95",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 95 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 2,
+    seasonNumber: 2,
+    episode_number: 95,
+    episodeNumber: 95,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/NyYUwbib#BzwV6F77IJEcfDoR_BWZEc2wAWsnX26C4QSJ8SAgyPk",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-95",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/NyYUwbib#BzwV6F77IJEcfDoR_BWZEc2wAWsnX26C4QSJ8SAgyPk",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "96",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 96",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 96 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 2,
+    seasonNumber: 2,
+    episode_number: 96,
+    episodeNumber: 96,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/EuwyULRb#4bORyizFE2VDwozOorOPd5-_nTiN6XX9eDqpX3KR6BI",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-96",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/EuwyULRb#4bORyizFE2VDwozOorOPd5-_nTiN6XX9eDqpX3KR6BI",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "97",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 97",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 97 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 2,
+    seasonNumber: 2,
+    episode_number: 97,
+    episodeNumber: 97,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/9iQmSZgQ#3C6bIK2YWE2fOzjBgONammfKmAedKTuCDubU7dbt2tc",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-97",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/9iQmSZgQ#3C6bIK2YWE2fOzjBgONammfKmAedKTuCDubU7dbt2tc",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "98",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 98",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 98 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 2,
+    seasonNumber: 2,
+    episode_number: 98,
+    episodeNumber: 98,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/Z7I33YDS#iw-XRlcdV-YlT8U_z5-kB_chSlmJUDeJ3rDq6-X5B7w",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-98",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/Z7I33YDS#iw-XRlcdV-YlT8U_z5-kB_chSlmJUDeJ3rDq6-X5B7w",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "99",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 99",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 99 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 2,
+    seasonNumber: 2,
+    episode_number: 99,
+    episodeNumber: 99,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/EvQ3RBrb#Lmo6m11zn_30dRzP9hirq-x5-L_tak_w8MwElBhUvzQ",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-99",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/EvQ3RBrb#Lmo6m11zn_30dRzP9hirq-x5-L_tak_w8MwElBhUvzQ",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "100",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 100",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 100 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 2,
+    seasonNumber: 2,
+    episode_number: 100,
+    episodeNumber: 100,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/h3oEVKQJ#PZtxpOVR6oat9p12Dy1neYvtO1gyLpADQuRd__Px2rk",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-100",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/h3oEVKQJ#PZtxpOVR6oat9p12Dy1neYvtO1gyLpADQuRd__Px2rk",
+        quality: "1080p FHD"
+      }
+    ]
+  },
+  {
+    id: "101",
+    title: "\u0627\u0644\u062D\u0644\u0642\u0629 101",
+    description: "\u0627\u0644\u062D\u0644\u0642\u0629 101 \u0645\u0646 \u0623\u0646\u0645\u064A \u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643. \u062A\u0627\u0628\u0639 \u0645\u063A\u0627\u0645\u0631\u0627\u062A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0648\u0641\u0631\u064A\u0642 \u0634\u0648\u0647\u0648\u0643\u0648 \u0641\u064A \u0637\u0631\u064A\u0642\u0647\u0645 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    season: 2,
+    seasonNumber: 2,
+    episode_number: 101,
+    episodeNumber: 101,
+    thumbnail: "/logoep.jpg",
+    duration: "23:30",
+    mega_link: "https://mega.nz/file/J3RnTLLT#OYp72LPc_wU46y9y36OfdfM1SKYdhGGb2pDk_p9bHhA",
+    video_url: "",
+    animeId: "slam-dunk",
+    servers: [
+      {
+        id: "srv-mega-101",
+        name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+        url: "https://mega.nz/file/J3RnTLLT#OYp72LPc_wU46y9y36OfdfM1SKYdhGGb2pDk_p9bHhA",
+        quality: "1080p FHD"
+      }
+    ]
+  }
+];
+
+// src/data/animes.json
+var animes_default = [
+  {
+    id: "slam-dunk",
+    title: "\u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643 (Slam Dunk)",
+    description: "\u0647\u0627\u0646\u0627\u0645\u064A\u062A\u0634\u064A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A \u0647\u0648 \u062C\u0627\u0646\u062D \u0633\u064A\u0626 \u0627\u0644\u0633\u0645\u0639\u0629 \u064A\u062E\u0634\u0627\u0647 \u0627\u0644\u0637\u0644\u0627\u0628 \u0641\u064A \u0645\u062F\u0631\u0633\u062A\u0647. \u0628\u0639\u062F \u0631\u0641\u0636\u0647 \u0645\u0646 \u0642\u0628\u0644 50 \u0641\u062A\u0627\u0629\u060C \u064A\u0644\u062A\u0642\u064A \u0628\u0647\u0627\u0631\u0648\u0643\u0648 \u0623\u0643\u0627\u062C\u064A\u060C \u0627\u0644\u0641\u062A\u0627\u0629 \u0627\u0644\u062A\u064A \u0633\u062A\u0642\u0648\u062F\u0647 \u0625\u0644\u0649 \u0639\u0627\u0644\u0645 \u0643\u0631\u0629 \u0627\u0644\u0633\u0644\u0629.",
+    coverImage: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRTxpjOV_-f3YQQLUb_T_57HXpyZ4NIlMatMg&s",
+    bannerImage: "/hero-bg.jpg",
+    type: "TV Series",
+    status: "completed",
+    totalEpisodes: 101,
+    releaseYear: 1993,
+    genres: [
+      "Sports",
+      "Comedy",
+      "School",
+      "Shounen"
+    ],
+    title_en: "Slam Dunk",
+    title_jp: null,
+    trailerUrl: null,
+    rating: 9,
+    isFeatured: false,
+    isTrending: false,
+    planet: "\u0631\u064A\u0627\u0636\u0629",
+    studio: "Toei Animation",
+    ageRating: "+16",
+    audioLanguage: "dubbed",
+    quality: "4K",
+    updatedAt: "2026-10-13T11:23:07.040Z",
+    createdAt: "2026-10-10T05:47:30.684Z",
+    title_ar: "\u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643"
+  },
+  {
+    id: "conan",
+    title: "\u0627\u0644\u0645\u062D\u0642\u0642 \u0643\u0648\u0646\u0627\u0646 (Detective Conan)",
+    description: "\u0645\u0633\u0644\u0633\u0644 \u0627\u0644\u0645\u062D\u0642\u0642 \u0643\u0648\u0646\u0627\u0646\u060C \u0623\u0646\u0645\u064A \u0627\u0644\u063A\u0645\u0648\u0636 \u0648\u0627\u0644\u062C\u0631\u064A\u0645\u0629 \u0648\u0627\u0644\u0630\u0643\u0627\u0621 \u0627\u0644\u0623\u064A\u0642\u0648\u0646\u064A.",
+    coverImage: "data:image/jpeg;base64,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",
+    type: "TV Series",
+    status: "completed",
+    totalEpisodes: 150,
+    releaseYear: null,
+    genres: [
+      "\u063A\u0645\u0648\u0636"
+    ],
+    title_en: "Detective Conan",
+    title_jp: null,
+    bannerImage: null,
+    trailerUrl: null,
+    rating: 9,
+    isFeatured: true,
+    isTrending: false,
+    planet: "\u063A\u0645\u0648\u0636",
+    studio: "Toei Animation",
+    ageRating: "+16",
+    audioLanguage: "dubbed",
+    quality: "4K",
+    createdAt: "2026-10-10T05:48:35.118Z",
+    updatedAt: "2026-10-13T10:23:37.604Z",
+    title_ar: "\u0627\u0644\u0645\u062D\u0642\u0642 \u0643\u0648\u0646\u0627\u0646"
+  }
+];
+
+// src/data/characters.json
+var characters_default = [
+  {
+    id: "conan-edogawa",
+    animeId: "conan",
+    name: "Conan Edogawa",
+    name_ar: "\u0643\u0648\u0646\u0627\u0646 \u0625\u064A\u062F\u0648\u063A\u0627\u0648\u0627",
+    name_en: "Conan Edogawa",
+    name_jp: "\u6C5F\u6238\u5DDD \u30B3\u30CA\u30F3",
+    role: "\u0628\u0637\u0644 \u0631\u0626\u064A\u0633\u064A (\u0627\u0644\u0645\u062D\u0642\u0642 \u0627\u0644\u0639\u0628\u0642\u0631\u064A)",
+    team: "\u0641\u0631\u064A\u0642 \u0627\u0644\u062A\u062D\u0631\u064A\u0627\u062A \u0627\u0644\u0635\u063A\u064A\u0631",
+    position: "\u0645\u062D\u0642\u0642 \u0648\u0645\u0633\u062A\u0646\u062A\u062C",
+    voiceActorJa: "\u0645\u064A\u0646\u0627\u0645\u064A \u062A\u0627\u0643\u0627\u064A\u0627\u0645\u0627 (Minami Takayama)",
+    voiceActorAr: "\u0622\u0645\u0627\u0644 \u0633\u0639\u062F \u0627\u0644\u062F\u064A\u0646",
+    description: "\u0633\u064A\u0646\u0634\u064A \u0643\u0648\u062F\u0648 \u0628\u0639\u062F \u0623\u0646 \u062A\u0642\u0644\u0635 \u062C\u0633\u062F\u0647 \u0628\u0641\u0639\u0644 \u0639\u0642\u0627\u0631 APTX 4869\u060C \u064A\u0639\u064A\u0634 \u0645\u062A\u0646\u0643\u0631\u0627\u064B \u0643\u0637\u0641\u0644 \u0641\u064A \u0645\u0646\u0632\u0644 \u062A\u0648\u063A\u0648 \u0645\u0648\u0631\u064A \u0644\u062D\u0644 \u0627\u0644\u0642\u0636\u0627\u064A\u0627 \u0627\u0644\u063A\u0627\u0645\u0636\u0629 \u0648\u0645\u0637\u0627\u0631\u062F\u0629 \u0627\u0644\u0645\u0646\u0638\u0645\u0629 \u0627\u0644\u0633\u0648\u062F\u0627\u0621 \u0648\u0627\u0633\u062A\u0639\u0627\u062F\u0629 \u062C\u0633\u062F\u0647 \u0627\u0644\u062D\u0642\u064A\u0642\u064A.",
+    image: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=800&q=80"
+  },
+  {
+    id: "shinichi-kudo",
+    animeId: "conan",
+    name: "Shinichi Kudo",
+    name_ar: "\u0633\u064A\u0646\u0634\u064A \u0643\u0648\u062F\u0648",
+    name_en: "Shinichi Kudo",
+    name_jp: "\u5DE5\u85E4 \u65B0\u4E00",
+    role: "\u0634\u0627\u0631\u0644\u0648\u0643 \u0647\u0648\u0644\u0645\u0632 \u0627\u0644\u0639\u0635\u0631 \u0627\u0644\u062D\u062F\u064A\u062B",
+    team: "\u062B\u0627\u0646\u0648\u064A\u0629 \u062A\u064A\u062A\u0627\u0646",
+    position: "\u0645\u062A\u062D\u0631\u064A \u0627\u0644\u062B\u0627\u0646\u0648\u064A\u0629",
+    voiceActorJa: "\u0643\u0627\u0628\u064A\u0647 \u064A\u0627\u0645\u0627\u063A\u0648\u062A\u0634\u064A (Kappei Yamaguchi)",
+    voiceActorAr: "\u0632\u064A\u0627\u062F \u0627\u0644\u0631\u0641\u0627\u0639\u064A / \u0631\u0623\u0641\u062A \u0628\u0627\u0632\u0648",
+    description: "\u0645\u062A\u062D\u0631\u064A \u0627\u0644\u062B\u0627\u0646\u0648\u064A\u0629 \u0627\u0644\u0639\u0628\u0642\u0631\u064A \u0627\u0644\u0645\u0634\u0647\u0648\u0631 \u0628\u0630\u0643\u0627\u0626\u0647 \u0627\u0644\u062D\u0627\u062F \u0648\u0627\u0633\u062A\u0646\u062A\u0627\u062C\u0627\u062A\u0647 \u0627\u0644\u0645\u0630\u0647\u0644\u0629 \u0627\u0644\u062A\u064A \u062A\u0636\u0627\u0647\u064A \u0634\u0627\u0631\u0644\u0648\u0643 \u0647\u0648\u0644\u0645\u0632\u060C \u064A\u0633\u0639\u0649 \u062F\u0627\u0626\u0645\u0627\u064B \u0644\u0643\u0634\u0641 \u0627\u0644\u062D\u0642\u064A\u0642\u0629 \u0627\u0644\u0648\u0627\u062D\u062F\u0629.",
+    image: "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=800&q=80"
+  },
+  {
+    id: "ran-mouri",
+    animeId: "conan",
+    name: "Ran Mouri",
+    name_ar: "\u0631\u0627\u0646 \u0645\u0648\u0631\u064A",
+    name_en: "Ran Mouri",
+    name_jp: "\u6BDB\u5229 \u862D",
+    role: "\u0628\u0637\u0644\u0629 \u0627\u0644\u0642\u0635\u0629 \u0648\u0643\u0627\u0628\u062A\u0646 \u0627\u0644\u0643\u0627\u0631\u0627\u062A\u064A\u0647",
+    team: "\u0646\u0627\u062F\u064A \u0643\u0627\u0631\u0627\u062A\u064A\u0647 \u062B\u0627\u0646\u0648\u064A\u0629 \u062A\u064A\u062A\u0627\u0646",
+    position: "\u0643\u0627\u0628\u062A\u0646 \u0641\u0631\u064A\u0642 \u0627\u0644\u0643\u0627\u0631\u0627\u062A\u064A\u0647",
+    voiceActorJa: "\u0648\u0627\u0643\u0627\u0646\u0627 \u064A\u0627\u0645\u0627\u0632\u0627\u0643\u064A (Wakana Yamazaki)",
+    voiceActorAr: "\u0633\u0645\u0631 \u0643\u0648\u0643\u0634",
+    description: "\u0635\u062F\u064A\u0642\u0629 \u0637\u0641\u0648\u0644\u0629 \u0633\u064A\u0646\u0634\u064A \u0643\u0648\u062F\u0648 \u0648\u0627\u0628\u0646\u0629 \u062A\u0648\u063A\u0648 \u0645\u0648\u0631\u064A\u060C \u0628\u0637\u0644\u0629 \u0627\u0644\u0643\u0627\u0631\u0627\u062A\u064A\u0647 \u0641\u064A \u0645\u0646\u0637\u0642\u0629 \u0637\u0648\u0643\u064A\u0648 \u0630\u0627\u062A \u0627\u0644\u0642\u0644\u0628 \u0627\u0644\u0631\u0642\u064A\u0642 \u0648\u0627\u0644\u0634\u062C\u0627\u0639\u0629 \u0627\u0644\u0641\u0627\u0626\u0642\u0629 \u0641\u064A \u062D\u0645\u0627\u064A\u0629 \u0623\u0635\u062F\u0642\u0627\u0626\u0647\u0627.",
+    image: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=800&q=80"
+  },
+  {
+    id: "kogoro-mouri",
+    animeId: "conan",
+    name: "Kogoro Mouri",
+    name_ar: "\u062A\u0648\u063A\u0648 \u0645\u0648\u0631\u064A",
+    name_en: "Kogoro Mouri",
+    name_jp: "\u6BDB\u5229 \u5C0F\u4E94\u90CE",
+    role: "\u0627\u0644\u0645\u062D\u0642\u0642 \u0627\u0644\u0646\u0627\u0626\u0645 \u0627\u0644\u0634\u0647\u064A\u0631",
+    team: "\u0648\u0643\u0627\u0644\u0629 \u0645\u0648\u0631\u064A \u0644\u0644\u062A\u062D\u0631\u064A\u0627\u062A",
+    position: "\u0645\u062D\u0642\u0642 \u062E\u0627\u0635",
+    voiceActorJa: "\u0623\u0643\u064A\u0631\u0627 \u0643\u0627\u0645\u064A\u0627 / \u0631\u064A\u0643\u064A\u0627 \u0643\u0648\u064A\u0627\u0645\u0627",
+    voiceActorAr: "\u0645\u0631\u0648\u0627\u0646 \u0641\u0631\u062D\u0627\u062A",
+    description: "\u0634\u0631\u0637\u064A \u0633\u0627\u0628\u0642 \u0648\u0645\u062D\u0642\u0642 \u062E\u0627\u0635 \u0641\u064A \u0637\u0648\u0643\u064A\u0648\u060C \u0627\u0634\u062A\u0647\u0631 \u0641\u064A \u0623\u0631\u062C\u0627\u0621 \u0627\u0644\u064A\u0627\u0628\u0627\u0646 \u0628\u0644\u0642\u0628 \u0627\u0644\u0645\u062D\u0642\u0642 \u0627\u0644\u0646\u0627\u0626\u0645 \u0628\u0641\u0636\u0644 \u062D\u0644\u0648\u0644 \u0643\u0648\u0646\u0627\u0646 \u0627\u0644\u0630\u0643\u064A\u0629 \u0644\u0644\u0642\u0636\u0627\u064A\u0627 \u0627\u0644\u0645\u0639\u0642\u062F\u0629.",
+    image: "https://images.unsplash.com/photo-1563089145-599997674d42?w=800&q=80"
+  },
+  {
+    id: "ai-haibara",
+    animeId: "conan",
+    name: "Ai Haibara",
+    name_ar: "\u0647\u064A\u0628\u0627\u0631\u0627 \u0622\u064A (\u0634\u064A\u0647\u0648 \u0645\u064A\u0627\u0646\u0648)",
+    name_en: "Ai Haibara",
+    name_jp: "\u7070\u539F \u54C0",
+    role: "\u0639\u0627\u0644\u0645\u0629 \u0627\u0644\u0643\u064A\u0645\u064A\u0627\u0621 \u0648\u0645\u0628\u062A\u0643\u0631\u0629 \u0627\u0644\u0639\u0642\u0627\u0631",
+    team: "\u0627\u0644\u0645\u0646\u0638\u0645\u0629 \u0627\u0644\u0633\u0648\u062F\u0627\u0621 \u0633\u0627\u0628\u0642\u0627\u064B",
+    position: "\u0639\u0627\u0644\u0645\u0629 \u0643\u064A\u0645\u064A\u0627\u0621 \u0648\u0623\u062F\u0648\u064A\u0629",
+    voiceActorJa: "\u0645\u064A\u063A\u0648\u0645\u064A \u0647\u0627\u064A\u0627\u0634\u064A\u0628\u0627\u0631\u0627 (Megumi Hayashibara)",
+    voiceActorAr: "\u0641\u0627\u062A\u0646 \u0639\u064A\u062F\u0648",
+    description: "\u0627\u0644\u0639\u0627\u0644\u0645\u0629 \u0627\u0644\u0633\u0627\u0628\u0642\u0629 \u0641\u064A \u0627\u0644\u0645\u0646\u0638\u0645\u0629 \u0627\u0644\u0633\u0648\u062F\u0627\u0621 \u0627\u0644\u0645\u0644\u0642\u0628\u0629 \u0628\u0640 \u0634\u064A\u0631\u064A\u060C \u0635\u0646\u0639\u062A \u0639\u0642\u0627\u0631 APTX 4869 \u062B\u0645 \u062A\u0646\u0627\u0648\u0644\u062A\u0647 \u0644\u0644\u0646\u062C\u0627\u0629 \u0628\u062D\u064A\u0627\u062A\u0647\u0627\u060C \u0648\u062A\u062A\u0639\u0627\u0648\u0646 \u0645\u0639 \u0643\u0648\u0646\u0627\u0646 \u0648\u0627\u0644\u0628\u0631\u0648\u0641\u064A\u0633\u0648\u0631 \u0623\u063A\u0627\u0633\u0627 \u0644\u0635\u0646\u0639 \u0627\u0644\u062A\u0631\u064A\u0627\u0642 \u0627\u0644\u0645\u0636\u0627\u062F.",
+    image: "https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=800&q=80"
+  },
+  {
+    id: "hanamichi-sakuragi",
+    animeId: "slam-dunk",
+    name: "Hanamichi Sakuragi",
+    name_ar: "\u062D\u0633\u0627\u0646 (\u0647\u0627\u0646\u0627\u0645\u064A\u062A\u0634\u064A \u0633\u0627\u0643\u0648\u0631\u0627\u062C\u064A)",
+    name_en: "Hanamichi Sakuragi",
+    name_jp: "\u685C\u6728 \u82B1\u9053",
+    role: "\u0628\u0637\u0644 \u0627\u0644\u0642\u0635\u0629 \u0648\u0645\u0644\u0643 \u0627\u0644\u0645\u0631\u062A\u062F\u0627\u062A",
+    team: "\u0641\u0631\u064A\u0642 \u0627\u0644\u0635\u0642\u0648\u0631 (Shohoku)",
+    position: "\u0645\u0647\u0627\u062C\u0645 \u0642\u0648\u064A (Power Forward)",
+    number: "10",
+    height: "189.2 cm",
+    weight: "83 kg",
+    voiceActorJa: "\u062A\u0627\u0643\u064A\u0634\u064A \u0643\u0648\u0633\u0627\u0648 (Takeshi Kusao)",
+    voiceActorAr: "\u0639\u0627\u062F\u0644 \u0623\u0628\u0648 \u062D\u0633\u0648\u0646",
+    description: "\u0627\u0644\u0628\u0637\u0644 \u0627\u0644\u0645\u0628\u062A\u062F\u0626 \u0627\u0644\u0639\u0628\u0642\u0631\u064A \u0635\u0627\u062D\u0628 \u0627\u0644\u0634\u0639\u0631 \u0627\u0644\u0623\u062D\u0645\u0631 \u0648\u0627\u0644\u0639\u0632\u064A\u0645\u0629 \u0627\u0644\u0641\u0648\u0644\u0627\u0630\u064A\u0629\u060C \u0628\u062F\u0623 \u0643\u0631\u0629 \u0627\u0644\u0633\u0644\u0629 \u0645\u0635\u0627\u062F\u0641\u0629 \u0644\u064A\u062A\u062D\u0648\u0644 \u0625\u0644\u0649 \u0633\u064A\u062F \u0627\u0644\u0643\u0631\u0627\u062A \u0627\u0644\u0645\u0631\u062A\u062F\u0629 \u0648\u0633\u0644\u0627\u062D \u0627\u0644\u0635\u0642\u0648\u0631 \u0627\u0644\u062D\u0627\u0633\u0645.",
+    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuARaixDwClMBk8VjPmR1Q2rUIzdPzwaLu2UN88LAaneAT68-Dt1lyWDu-0gkKtii62D2siPahcfHX4SFVz3C3ign3Ab0TRwZXQSb7CIPBeuWZDXQrKYufhHb07FXgObV8byTeeQEjhmD0JGOHPuJ6crdhM7akhITM1MepDnWa_wDBnvnNco4IYOGt659sF1WSCFyKDMcDNWPrC9fEF1R_xhCvvamv9DhG2ws40iHFKDLtDpbhs8NwJP"
+  },
+  {
+    id: "kaede-rukawa",
+    animeId: "slam-dunk",
+    name: "Kaede Rukawa",
+    name_ar: "\u0641\u0627\u062F\u064A (\u0643\u0627\u064A\u062F\u064A \u0631\u0648\u0643\u0627\u0648\u0627)",
+    name_en: "Kaede Rukawa",
+    name_jp: "\u6D41\u5DDD \u6953",
+    role: "\u0627\u0644\u0647\u062F\u0651\u0627\u0641 \u0648\u0646\u062C\u0645 \u0627\u0644\u0641\u0631\u064A\u0642 \u0627\u0644\u0627\u0633\u062A\u062B\u0646\u0627\u0626\u064A",
+    team: "\u0641\u0631\u064A\u0642 \u0627\u0644\u0635\u0642\u0648\u0631 (Shohoku)",
+    position: "\u0645\u0647\u0627\u062C\u0645 \u0635\u063A\u064A\u0631 (Small Forward)",
+    number: "11",
+    height: "187 cm",
+    weight: "75 kg",
+    voiceActorJa: "\u0647\u064A\u0643\u0627\u0631\u0648 \u0645\u064A\u062F\u0648\u0631\u064A\u0643\u0627\u0648\u0627 (Hikaru Midorikawa)",
+    voiceActorAr: "\u0631\u0623\u0641\u062A \u0628\u0627\u0632\u0648",
+    description: "\u0627\u0644\u0646\u062C\u0645 \u0627\u0644\u0635\u0627\u0639\u062F \u0627\u0644\u0647\u0627\u062F\u0626 \u0648\u0627\u0644\u0644\u0627\u0639\u0628 \u0627\u0644\u0623\u0643\u062B\u0631 \u0645\u0647\u0627\u0631\u0629 \u0641\u064A \u0645\u0642\u0627\u0637\u0639\u0629 \u0643\u0627\u0646\u0627\u063A\u0627\u0648\u0627\u060C \u0643\u0631\u0651\u0633 \u062D\u064A\u0627\u062A\u0647 \u0644\u064A\u0643\u0648\u0646 \u0644\u0627\u0639\u0628 \u0643\u0631\u0629 \u0627\u0644\u0633\u0644\u0629 \u0631\u0642\u0645 1 \u0641\u064A \u0627\u0644\u064A\u0627\u0628\u0627\u0646.",
+    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBFCBkEUZo8xV4WIupmc5uNpKqdnyHvRtXxO9kMzYTpVkAux1wiez5BMTP4wHyZzuwwVZOg_wpgku3f7SnzUPb-4AGdqIsO36pWFPLcHgbVL64MitADw-y54oNHCZX-4R68Oz9JjSkUHPj2bxQcK1UB22KBS5LnDGWFtCTle9at7MijbCu1PebjShS7NLnq718Qqm3TY2AhyBuHK0i-Pu5wO9kEtxsnSQlwrIRAINlXkAbGKHpT3o3v"
+  },
+  {
+    id: "takenori-akagi",
+    animeId: "slam-dunk",
+    name: "Takenori Akagi",
+    name_ar: "\u0633\u0639\u062F (\u062A\u0627\u0643\u064A\u0646\u0648\u0631\u064A \u0623\u0643\u0627\u062C\u064A)",
+    name_en: "Takenori Akagi",
+    name_jp: "\u8D64\u6728 \u525B\u61B2",
+    role: "\u0642\u0627\u0626\u062F \u0627\u0644\u0641\u0631\u064A\u0642 \u0648\u062D\u0627\u0645\u064A \u0639\u0631\u064A\u0646 \u0627\u0644\u0633\u0644\u0629",
+    team: "\u0641\u0631\u064A\u0642 \u0627\u0644\u0635\u0642\u0648\u0631 (Shohoku)",
+    position: "\u0644\u0627\u0639\u0628 \u0648\u0633\u0637 (Center)",
+    number: "4",
+    height: "197 cm",
+    weight: "90 kg",
+    voiceActorJa: "\u0643\u064A\u0648\u0643\u064A \u064A\u0627\u0646\u0627\u062F\u0627 (Kiyoyuki Yanada)",
+    voiceActorAr: "\u0645\u0631\u0648\u0627\u0646 \u0641\u0631\u062D\u0627\u062A",
+    description: "\u0642\u0627\u0626\u062F \u0641\u0631\u064A\u0642 \u0627\u0644\u0635\u0642\u0648\u0631 \u0627\u0644\u0645\u0644\u0642\u0628 \u0628\u0627\u0644\u063A\u0648\u0631\u064A\u0644\u0627 \u0648\u0635\u062E\u0631\u0629 \u0627\u0644\u062F\u0641\u0627\u0639 \u0627\u0644\u0635\u0644\u0628\u0629\u060C \u0642\u0627\u062F \u0627\u0644\u0641\u0631\u064A\u0642 \u0628\u062D\u0632\u0645 \u0648\u0634\u063A\u0641 \u0644\u0627 \u064A\u0644\u064A\u0646 \u0644\u062A\u062D\u0642\u064A\u0642 \u062D\u0644\u0645 \u0627\u0644\u062A\u0623\u0647\u0644 \u0644\u0644\u0628\u0637\u0648\u0644\u0629 \u0627\u0644\u0648\u0637\u0646\u064A\u0629.",
+    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCmq2nceLUBxfoOJqYBIc68pDPpefSLxVY7M152CuX1IFOvAxGj2Rpzxp5F0gSr9Y-BCCe6usdJzndy7g6LaB-KJ-OxcCkIZlzk3STd-PC5P66C7xc8q6jnEjHoVG329FisGcXuAgmQrr3_GIOV33yYYRqCVtaAfyqBqZo5cPhodjoVnHmyLZe0S9_WXU_A9aFSXfY6j_doWh4QTJJsde1fCHFuQxJN7NBNo5kvNQnkZOAusJIra160"
+  }
+];
+
 // src/routes/mobile.routes.ts
 var mobileRoutes = new Hono3();
+var fallbackEpMap = /* @__PURE__ */ new Map();
+for (const ep of episodes_default) {
+  fallbackEpMap.set(String(ep.id), ep);
+  if (ep.episodeNumber) fallbackEpMap.set(String(ep.episodeNumber), ep);
+  if (ep.episode_number) fallbackEpMap.set(String(ep.episode_number), ep);
+}
+function formatEpisode(ep, fallbackAnimeId) {
+  const epIdStr = String(ep.id);
+  const epNum = ep.episodeNumber || ep.episode_number || 1;
+  const fallbackEp = fallbackEpMap.get(epIdStr) || fallbackEpMap.get(String(epNum));
+  let servers = ep.servers && ep.servers.length > 0 ? ep.servers : [];
+  if (servers.length === 0 && fallbackEp) {
+    if (fallbackEp.servers && fallbackEp.servers.length > 0) {
+      servers = fallbackEp.servers;
+    } else if (fallbackEp.mega_link) {
+      servers = [
+        {
+          id: `srv-mega-${epIdStr}`,
+          name: "\u0633\u064A\u0631\u0641\u0631 \u0645\u064A\u062C\u0627 \u0627\u0644\u0633\u0631\u064A\u0639",
+          url: fallbackEp.mega_link,
+          quality: "1080p FHD"
+        }
+      ];
+    }
+  }
+  return {
+    id: epIdStr,
+    animeId: ep.animeId || fallbackAnimeId || "slam-dunk",
+    title: ep.title,
+    description: ep.description || fallbackEp?.description || "",
+    thumbnail: ep.thumbnail || fallbackEp?.thumbnail || "/logoep.jpg",
+    duration: ep.duration || fallbackEp?.duration || "23:30",
+    episodeNumber: Number(epNum),
+    episode_number: Number(epNum),
+    seasonNumber: Number(ep.seasonNumber || ep.season_number || 1),
+    season_number: Number(ep.seasonNumber || ep.season_number || 1),
+    servers: servers.map((s) => ({
+      id: s.id || `srv-${Math.random().toString(36).substring(2, 7)}`,
+      name: s.name,
+      url: s.url,
+      quality: s.quality || "1080p FHD"
+    })),
+    createdAt: ep.createdAt ? typeof ep.createdAt === "string" ? ep.createdAt : ep.createdAt.toISOString() : (/* @__PURE__ */ new Date()).toISOString()
+  };
+}
 mobileRoutes.get("/home", optionalAuthMiddleware, async (c) => {
   try {
     const user = c.get("user");
-    const [slider, latest, characters, settings, progress] = await Promise.all([
+    const [slider, latestDb, charactersDb, settings, progress] = await Promise.all([
       // 1. Featured Slider
       prisma.anime.findMany({
         where: { isFeatured: true },
@@ -5539,9 +7997,14 @@ mobileRoutes.get("/home", optionalAuthMiddleware, async (c) => {
         select: {
           id: true,
           title: true,
+          description: true,
           coverImage: true,
           bannerImage: true,
-          rating: true
+          rating: true,
+          genres: true,
+          type: true,
+          status: true,
+          totalEpisodes: true
         }
       }),
       // 2. Latest Episodes
@@ -5549,7 +8012,8 @@ mobileRoutes.get("/home", optionalAuthMiddleware, async (c) => {
         take: 12,
         orderBy: { createdAt: "desc" },
         include: {
-          anime: { select: { id: true, title: true, coverImage: true } }
+          anime: { select: { id: true, title: true, coverImage: true } },
+          servers: true
         }
       }),
       // 3. Shohoku Roster Characters
@@ -5568,11 +8032,15 @@ mobileRoutes.get("/home", optionalAuthMiddleware, async (c) => {
         orderBy: { updatedAt: "desc" }
       }) : Promise.resolve([])
     ]);
+    const formattedLatest = (latestDb && latestDb.length > 0 ? latestDb : episodes_default.slice(0, 12)).map(
+      (ep) => formatEpisode(ep)
+    );
     return sendSuccess(c, {
-      slider,
+      slider: slider && slider.length > 0 ? slider : animes_default.slice(0, 5),
       continueWatching: progress,
-      latestEpisodes: latest,
-      characters,
+      latest: formattedLatest,
+      latestEpisodes: formattedLatest,
+      characters: charactersDb && charactersDb.length > 0 ? charactersDb : characters_default.slice(0, 10),
       settings: settings || {
         siteName: "Slam Dunk",
         maintenanceMode: false,
@@ -5580,7 +8048,212 @@ mobileRoutes.get("/home", optionalAuthMiddleware, async (c) => {
       }
     });
   } catch (error) {
-    return sendError(c, "HOME_FETCH_ERROR", error.message || "\u0641\u0634\u0644 \u062C\u0644\u0628 \u0628\u064A\u0627\u0646\u0627\u062A \u0627\u0644\u0635\u0641\u062D\u0629 \u0627\u0644\u0631\u0626\u064A\u0633\u064A\u0629 \u0644\u0644\u0645\u0648\u0628\u0627\u064A\u0644", 500);
+    console.error("Mobile Home Error:", error);
+    const staticLatest = episodes_default.slice(0, 12).map((ep) => formatEpisode(ep));
+    return sendSuccess(c, {
+      slider: animes_default.slice(0, 5),
+      continueWatching: [],
+      latest: staticLatest,
+      latestEpisodes: staticLatest,
+      characters: characters_default.slice(0, 10),
+      settings: { siteName: "Slam Dunk", maintenanceMode: false, admobEnabled: false }
+    });
+  }
+});
+mobileRoutes.get("/animes/:id/episodes", async (c) => {
+  const id = c.req.param("id");
+  try {
+    let episodes = await prisma.episode.findMany({
+      where: { animeId: id },
+      orderBy: { episodeNumber: "asc" },
+      include: { servers: true }
+    });
+    if (!episodes || episodes.length === 0) {
+      const filtered = episodes_default.filter(
+        (ep) => ep.animeId === id || id === "slam-dunk"
+      );
+      episodes = filtered;
+    }
+    const formatted = episodes.map((ep) => formatEpisode(ep, id));
+    return sendSuccess(c, formatted);
+  } catch (error) {
+    console.warn("Mobile Anime Episodes Error, using fallback:", error.message);
+    const filtered = episodes_default.filter(
+      (ep) => ep.animeId === id || id === "slam-dunk"
+    );
+    const formatted = filtered.map((ep) => formatEpisode(ep, id));
+    return sendSuccess(c, formatted);
+  }
+});
+mobileRoutes.get("/animes", async (c) => {
+  try {
+    const type = c.req.query("type");
+    const status = c.req.query("status");
+    const genre = c.req.query("genre");
+    const where = {};
+    if (type) where.type = type;
+    if (status) where.status = status;
+    if (genre) where.genres = { has: genre };
+    let animes = await prisma.anime.findMany({
+      where,
+      orderBy: { updatedAt: "desc" }
+    });
+    if (!animes || animes.length === 0) {
+      let filtered = animes_default;
+      if (type) filtered = filtered.filter((a) => a.type === type);
+      if (status) filtered = filtered.filter((a) => a.status === status);
+      if (genre) filtered = filtered.filter((a) => a.genres?.includes(genre));
+      animes = filtered;
+    }
+    return sendSuccess(c, animes);
+  } catch (error) {
+    return sendSuccess(c, animes_default);
+  }
+});
+mobileRoutes.get("/animes/:id", async (c) => {
+  const id = c.req.param("id");
+  try {
+    let anime = await prisma.anime.findUnique({
+      where: { id },
+      include: {
+        episodes: {
+          orderBy: { episodeNumber: "asc" },
+          include: { servers: true }
+        }
+      }
+    });
+    if (!anime) {
+      const found = animes_default.find((a) => a.id === id);
+      if (found) {
+        anime = {
+          ...found,
+          episodes: episodes_default.filter((ep) => ep.animeId === id || id === "slam-dunk").map((ep) => formatEpisode(ep, id))
+        };
+      }
+    } else if (anime.episodes) {
+      anime.episodes = anime.episodes.map((ep) => formatEpisode(ep, id));
+    }
+    if (!anime) {
+      return sendError(c, "NOT_FOUND", "\u0627\u0644\u0623\u0646\u0645\u064A \u0627\u0644\u0645\u0637\u0644\u0648\u0628 \u063A\u064A\u0631 \u0645\u0648\u062C\u0648\u062F", 404);
+    }
+    return sendSuccess(c, anime);
+  } catch (error) {
+    const found = animes_default.find((a) => a.id === id);
+    if (found) {
+      return sendSuccess(c, {
+        ...found,
+        episodes: episodes_default.filter((ep) => ep.animeId === id || id === "slam-dunk").map((ep) => formatEpisode(ep, id))
+      });
+    }
+    return sendError(c, "FETCH_ERROR", "\u0641\u0634\u0644 \u062C\u0644\u0628 \u062A\u0641\u0627\u0635\u064A\u0644 \u0627\u0644\u0639\u0645\u0644", 500);
+  }
+});
+mobileRoutes.get("/episodes/:id", async (c) => {
+  const id = c.req.param("id");
+  try {
+    let episode = await prisma.episode.findUnique({
+      where: { id },
+      include: {
+        servers: true,
+        anime: { select: { id: true, title: true, coverImage: true } }
+      }
+    });
+    if (!episode && !isNaN(Number(id))) {
+      episode = await prisma.episode.findFirst({
+        where: { episodeNumber: Number(id) },
+        include: {
+          servers: true,
+          anime: { select: { id: true, title: true, coverImage: true } }
+        }
+      });
+    }
+    if (!episode) {
+      const fallback = fallbackEpMap.get(id);
+      if (fallback) {
+        return sendSuccess(c, formatEpisode(fallback));
+      }
+      return sendError(c, "NOT_FOUND", "\u0627\u0644\u062D\u0644\u0642\u0629 \u0627\u0644\u0645\u0637\u0644\u0648\u0628\u0629 \u063A\u064A\u0631 \u0645\u0648\u062C\u0648\u062F\u0629", 404);
+    }
+    const formatted = formatEpisode(episode);
+    return sendSuccess(c, {
+      ...formatted,
+      animeTitle: episode.anime?.title || "\u0633\u0644\u0627\u0645 \u062F\u0627\u0646\u0643",
+      animeCover: episode.anime?.coverImage || "/hero-bg.jpg"
+    });
+  } catch (error) {
+    const fallback = fallbackEpMap.get(id);
+    if (fallback) {
+      return sendSuccess(c, formatEpisode(fallback));
+    }
+    return sendError(c, "FETCH_ERROR", "\u0641\u0634\u0644 \u062C\u0644\u0628 \u062A\u0641\u0627\u0635\u064A\u0644 \u0627\u0644\u062D\u0644\u0642\u0629", 500);
+  }
+});
+mobileRoutes.get("/characters", async (c) => {
+  try {
+    const animeId = c.req.query("animeId");
+    const where = animeId && animeId !== "all" ? { animeId } : {};
+    let characters = await prisma.character.findMany({
+      where,
+      orderBy: { number: "asc" }
+    });
+    if (!characters || characters.length === 0) {
+      let filtered = characters_default;
+      if (animeId && animeId !== "all") {
+        filtered = filtered.filter(
+          (char) => char.animeId?.toLowerCase() === animeId.toLowerCase()
+        );
+      }
+      characters = filtered;
+    }
+    return sendSuccess(c, characters);
+  } catch (error) {
+    return sendSuccess(c, characters_default);
+  }
+});
+mobileRoutes.get("/search", async (c) => {
+  try {
+    const q = c.req.query("q")?.trim() || "";
+    if (!q) {
+      return sendSuccess(c, { animes: [], episodes: [] });
+    }
+    const [animeResults, episodeResults] = await Promise.all([
+      prisma.anime.findMany({
+        where: {
+          OR: [
+            { title: { contains: q, mode: "insensitive" } },
+            { description: { contains: q, mode: "insensitive" } }
+          ]
+        },
+        take: 10
+      }),
+      prisma.episode.findMany({
+        where: {
+          OR: [
+            { title: { contains: q, mode: "insensitive" } },
+            { description: { contains: q, mode: "insensitive" } }
+          ]
+        },
+        include: { servers: true },
+        take: 20
+      })
+    ]);
+    let animes = animeResults;
+    let episodes = episodeResults;
+    if (animes.length === 0 && episodes.length === 0) {
+      const lower = q.toLowerCase();
+      animes = animes_default.filter(
+        (a) => a.title?.toLowerCase().includes(lower) || a.description?.toLowerCase().includes(lower)
+      );
+      episodes = episodes_default.filter(
+        (ep) => ep.title?.toLowerCase().includes(lower) || ep.description?.toLowerCase().includes(lower)
+      ).slice(0, 20);
+    }
+    return sendSuccess(c, {
+      animes,
+      episodes: episodes.map((ep) => formatEpisode(ep))
+    });
+  } catch (error) {
+    return sendSuccess(c, { animes: [], episodes: [] });
   }
 });
 mobileRoutes.get("/config", async (c) => {
@@ -5588,13 +8261,16 @@ mobileRoutes.get("/config", async (c) => {
     const settings = await prisma.settings.findUnique({
       where: { id: "global" }
     });
-    return sendSuccess(c, settings || {
-      siteName: "Slam Dunk",
-      maintenanceMode: false,
-      latestVersion: "1.0.0",
-      updateUrl: "https://slam-dunk-w.vercel.app/download",
-      admobEnabled: false
-    });
+    return sendSuccess(
+      c,
+      settings || {
+        siteName: "Slam Dunk",
+        maintenanceMode: false,
+        latestVersion: "1.0.0",
+        updateUrl: "https://slam-dunk-w.vercel.app/download",
+        admobEnabled: false
+      }
+    );
   } catch (error) {
     return sendError(c, "CONFIG_ERROR", error.message || "\u0641\u0634\u0644 \u062C\u0644\u0628 \u0625\u0639\u062F\u0627\u062F\u0627\u062A \u0627\u0644\u062A\u0637\u0628\u064A\u0642", 500);
   }
@@ -5602,12 +8278,52 @@ mobileRoutes.get("/config", async (c) => {
 mobileRoutes.get("/plans", async (c) => {
   try {
     const plans = await prisma.plan.findMany({
-      where: { isActive: true }
+      where: { isActive: true },
+      orderBy: { price: "asc" }
     });
     return sendSuccess(c, plans);
   } catch (error) {
     return sendError(c, "PLANS_ERROR", error.message || "\u0641\u0634\u0644 \u062C\u0644\u0628 \u0628\u0627\u0642\u0627\u062A \u0627\u0644\u0627\u0634\u062A\u0631\u0627\u0643", 500);
   }
+});
+mobileRoutes.post("/plans", authMiddleware, async (c) => {
+  try {
+    const user = c.get("user");
+    const { planId } = await c.req.json();
+    const plan = await prisma.plan.findUnique({
+      where: { id: planId }
+    });
+    if (!plan) {
+      return sendError(c, "PLAN_NOT_FOUND", "\u0627\u0644\u0628\u0627\u0642\u0629 \u0627\u0644\u0645\u062D\u062F\u062F\u0629 \u063A\u064A\u0631 \u0645\u0648\u062C\u0648\u062F\u0629", 404);
+    }
+    const sub = await prisma.userSubscription.upsert({
+      where: { userId: user.userId },
+      update: {
+        planType: plan.name,
+        isActive: true,
+        startDate: /* @__PURE__ */ new Date(),
+        endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1e3)
+      },
+      create: {
+        userId: user.userId,
+        planType: plan.name,
+        isActive: true,
+        startDate: /* @__PURE__ */ new Date(),
+        endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1e3)
+      }
+    });
+    return sendSuccess(c, sub);
+  } catch (error) {
+    return sendError(c, "SUB_ERROR", error.message || "\u0641\u0634\u0644 \u0625\u0646\u0634\u0627\u0621 \u0627\u0644\u0627\u0634\u062A\u0631\u0627\u0643", 500);
+  }
+});
+mobileRoutes.get("/health", (c) => {
+  return sendSuccess(c, {
+    status: "ok",
+    service: "Mobile V1 API",
+    version: "2.5.0",
+    timestamp: (/* @__PURE__ */ new Date()).toISOString()
+  });
 });
 
 // src/routes/admin.routes.ts

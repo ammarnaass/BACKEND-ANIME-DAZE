@@ -98,6 +98,21 @@ animesRoutes.get("/:id", async (c) => {
   }
 });
 
+// GET /api/v1/animes/:id/episodes
+animesRoutes.get("/:id/episodes", async (c) => {
+  try {
+    const id = c.req.param("id");
+    const episodes = await prisma.episode.findMany({
+      where: { animeId: id },
+      orderBy: { episodeNumber: "asc" },
+      include: { servers: true },
+    });
+    return sendSuccess(c, episodes);
+  } catch (error: any) {
+    return sendError(c, "FETCH_ERROR", error.message || "فشل جلب قائمة الحلقات", 500);
+  }
+});
+
 // GET /api/v1/characters
 animesRoutes.get("/characters/all", async (c) => {
   try {
