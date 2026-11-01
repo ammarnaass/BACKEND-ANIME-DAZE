@@ -2392,6 +2392,7 @@ function sendSuccess(c, data, meta, status = 200) {
   return c.json(
     {
       ok: true,
+      success: true,
       data,
       ...meta ? { meta } : {}
     },

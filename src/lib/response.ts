@@ -10,6 +10,7 @@ export function sendSuccess<T>(
   return c.json(
     {
       ok: true,
+      success: true,
       data,
       ...(meta ? { meta } : {}),
     },
