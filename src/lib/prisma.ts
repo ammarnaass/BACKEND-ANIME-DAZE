@@ -14,11 +14,15 @@ declare global {
   var prismaInstance: PrismaClient | undefined;
 }
 
-const connectionString = `${process.env.DATABASE_URL}`;
+const connectionString = process.env.DATABASE_URL || "";
+if (!connectionString) {
+  console.error("⚠️ [CRITICAL] DATABASE_URL is missing! Please set DATABASE_URL in Vercel Environment Variables.");
+}
+
 const isLocal = connectionString.includes("localhost") || connectionString.includes("127.0.0.1");
 
 const pool = new pg.Pool({
-  connectionString,
+  connectionString: connectionString || undefined,
   ssl: isLocal ? false : { rejectUnauthorized: false },
   max: 10,
   idleTimeoutMillis: 30000,

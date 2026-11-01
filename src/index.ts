@@ -64,6 +64,26 @@ app.get("/", (c) => {
   });
 });
 
+app.get("/api", (c) => {
+  return c.json({
+    status: "ok",
+    service: "ANIME DAZE / Slam Dunk Hono Backend",
+    engine: "Hono.js on Vercel Serverless",
+    timestamp: new Date().toISOString(),
+    version: "2.5.0",
+  });
+});
+
+app.get("/api/health", (c) => {
+  return c.json({
+    status: "ok",
+    service: "ANIME DAZE / Slam Dunk Hono Backend",
+    engine: "Hono.js on Vercel Serverless",
+    timestamp: new Date().toISOString(),
+    version: "2.5.0",
+  });
+});
+
 // Mount Routes
 app.route("/api/v1/auth/sessions", sessionsRoutes);
 app.route("/api/v1/auth", authRoutes);

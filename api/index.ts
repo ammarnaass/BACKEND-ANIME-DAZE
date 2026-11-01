@@ -1,7 +1,7 @@
-import { handle } from "hono/vercel";
+import { handle } from "@hono/node-server/vercel";
 import app from "../src/index";
 
-// Use Node.js runtime on Vercel for Prisma PostgreSQL compatibility
+// Force Node.js Serverless Function runtime on Vercel for Prisma compatibility
 export const config = {
   runtime: "nodejs",
 };
