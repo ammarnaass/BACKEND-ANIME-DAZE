@@ -87,34 +87,64 @@ model Episode {
   seasonNumber    Int       @default(1)
   createdAt       DateTime  @default(now())
 
-  // Timecodes for player skip controls
+  // Timecodes for player skip controls & scrubbing
   introStart      Float?
   introEnd        Float?
   outroStart      Float?
   outroEnd        Float?
+  storyboardUrl   String?   // شريط معاينة اللقطات (VTT + WebP Spritesheet)
   
-  // Servers
+  // Streaming Relations
   servers         Server[]
+  subtitles       Subtitle[]
+  audioTracks     AudioTrack[]
 
   @@index([animeId])
   @@index([episodeNumber])
 }
 
 model Server {
-  id              String    @id @default(uuid())
-  episodeId       String
-  episode         Episode   @relation(fields: [episodeId], references: [id], onDelete: Cascade)
-  name            String
-  url             String
-  quality         String?
-  type            String    @default("hls") // hls | mp4 | embed | mega
-  priority        Int       @default(1)     // 1 = primary, 2 = secondary, etc.
-  isWorking       Boolean   @default(true)
-  lastCheckedAt   DateTime?
+  id                 String    @id @default(uuid())
+  episodeId          String
+  episode            Episode   @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+  name               String
+  url                String
+  quality            String?
+  type               String    @default("hls") // hls | mp4 | embed | mega
+  priority           Int       @default(1)     // 1 = primary, 2 = secondary, etc.
+  isWorking          Boolean   @default(true)
+  lastCheckedAt      DateTime?
+  supportedQualities String[]  @default(["1080p", "720p", "480p", "Auto"])
 
   @@index([episodeId])
   @@index([isWorking])
   @@index([priority])
+}
+
+model Subtitle {
+  id        String   @id @default(uuid())
+  episodeId String
+  episode   Episode  @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+  language  String   // "ar", "en"
+  label     String   // "العربية", "English"
+  url       String   // رابط ملف .vtt
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([episodeId])
+}
+
+model AudioTrack {
+  id        String   @id @default(uuid())
+  episodeId String
+  episode   Episode  @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+  language  String   // "ar" (مدبلج), "ja" (ياباني أصلي)
+  label     String   // "الدبلجة العربية الأصلية (مركز الزهرة)", "اليابانية الأصلية"
+  url       String?  // في حال كان مسار صوتي منفصل HLS
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([episodeId])
 }
 
 model Review {

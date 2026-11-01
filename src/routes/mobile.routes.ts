@@ -53,12 +53,33 @@ function formatEpisode(ep: any, fallbackAnimeId?: string) {
     introEnd: ep.introEnd ?? 90,
     outroStart: ep.outroStart ?? (ep.durationSeconds ? ep.durationSeconds - 90 : 1320),
     outroEnd: ep.outroEnd ?? (ep.durationSeconds || 1410),
+    storyboardUrl: ep.storyboardUrl || null,
+    subtitles: ep.subtitles || [],
+    audioTracks: (ep.audioTracks && ep.audioTracks.length > 0)
+      ? ep.audioTracks
+      : [
+          {
+            id: "audio-ar-default",
+            language: "ar",
+            label: "الدبلجة العربية الأصلية (مركز الزهرة)",
+            url: null,
+            isDefault: true,
+          },
+          {
+            id: "audio-ja-default",
+            language: "ja",
+            label: "اليابانية الأصلية",
+            url: null,
+            isDefault: false,
+          },
+        ],
     servers: servers.map((s: any, idx: number) => {
       const url = s.url || "";
       const lower = url.toLowerCase();
       let sType = s.type || "hls";
       if (lower.includes("mega.nz") || lower.includes("mega.io")) sType = "mega";
       else if (lower.includes(".m3u8")) sType = "hls";
+      else if (lower.includes(".mpd")) sType = "dash";
       else if (lower.includes(".mp4")) sType = "mp4";
       else if (lower.includes("embed") || lower.includes("iframe") || lower.includes("ok.ru") || lower.includes("vidmoly")) sType = "embed";
 
@@ -70,6 +91,9 @@ function formatEpisode(ep: any, fallbackAnimeId?: string) {
         type: sType,
         priority: s.priority || idx + 1,
         isWorking: s.isWorking !== undefined ? Boolean(s.isWorking) : true,
+        supportedQualities: s.supportedQualities && s.supportedQualities.length > 0
+          ? s.supportedQualities
+          : ["1080p", "720p", "480p", "Auto"],
       };
     }),
     createdAt: ep.createdAt ? (typeof ep.createdAt === "string" ? ep.createdAt : ep.createdAt.toISOString()) : new Date().toISOString(),
@@ -289,6 +313,8 @@ mobileRoutes.get("/episodes/:id", async (c) => {
       where: { id },
       include: {
         servers: true,
+        subtitles: true,
+        audioTracks: true,
         anime: { select: { id: true, title: true, coverImage: true } },
       },
     });
@@ -298,6 +324,8 @@ mobileRoutes.get("/episodes/:id", async (c) => {
         where: { episodeNumber: Number(id) },
         include: {
           servers: true,
+          subtitles: true,
+          audioTracks: true,
           anime: { select: { id: true, title: true, coverImage: true } },
         },
       });

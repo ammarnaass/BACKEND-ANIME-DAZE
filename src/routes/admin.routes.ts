@@ -94,10 +94,11 @@ const serverSchema = z.object({
   episodeId: z.string().min(1, "معرف الحلقة مطلوب"),
   name: z.string().min(1, "اسم السيرفر مطلوب"),
   url: z.string().url("رابط السيرفر يجب أن يكون رابطاً صالحاً"),
-  type: z.enum(["hls", "mp4", "embed", "mega"]).default("hls"),
+  type: z.enum(["hls", "mp4", "embed", "mega", "dash"]).default("hls"),
   quality: z.string().optional().default("1080p FHD"),
   priority: z.number().int().min(1).default(1),
   isWorking: z.boolean().default(true),
+  supportedQualities: z.array(z.string()).optional().default(["1080p", "720p", "480p", "Auto"]),
 });
 
 // POST /api/admin/servers - إضافة سيرفر جديد لحلقة
@@ -120,7 +121,7 @@ adminRoutes.post("/servers", async (c) => {
   }
 });
 
-// PUT /api/admin/servers/:id - تعديل سيرفر (رابط، حالة، جودة، نوع)
+// PUT /api/admin/servers/:id - تعديل سيرفر (رابط، حالة، جودة، نوع، جودات مدعومة)
 adminRoutes.put("/servers/:id", async (c) => {
   try {
     const id = c.req.param("id");
@@ -135,6 +136,7 @@ adminRoutes.put("/servers/:id", async (c) => {
         quality: body.quality,
         priority: body.priority !== undefined ? Number(body.priority) : undefined,
         isWorking: body.isWorking !== undefined ? Boolean(body.isWorking) : undefined,
+        supportedQualities: Array.isArray(body.supportedQualities) ? body.supportedQualities : undefined,
         lastCheckedAt: new Date(),
       },
     });
@@ -159,11 +161,136 @@ adminRoutes.delete("/servers/:id", async (c) => {
   }
 });
 
-// PATCH /api/admin/episodes/:id/timecodes - ضبط توقيت تخطي شارة البداية والنهاية
+// Helper for pinging video server URLs (HEAD or range GET)
+async function testServerConnectivity(url: string): Promise<{ isWorking: boolean; latencyMs: number; statusText: string }> {
+  const startTime = Date.now();
+  try {
+    // Attempt HEAD request first
+    let res = await fetch(url, {
+      method: "HEAD",
+      signal: AbortSignal.timeout(6000),
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AnimeDazePlayer/1.0",
+      },
+    });
+
+    // If method HEAD is not allowed (405), try range GET
+    if (res.status === 405) {
+      res = await fetch(url, {
+        method: "GET",
+        signal: AbortSignal.timeout(6000),
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AnimeDazePlayer/1.0",
+          Range: "bytes=0-100",
+        },
+      });
+    }
+
+    const latencyMs = Date.now() - startTime;
+    const isWorking = res.ok || [200, 206, 301, 302, 307, 308].includes(res.status);
+
+    return {
+      isWorking,
+      latencyMs,
+      statusText: `${res.status} ${res.statusText}`,
+    };
+  } catch (err: any) {
+    const latencyMs = Date.now() - startTime;
+    return {
+      isWorking: false,
+      latencyMs,
+      statusText: err.name === "TimeoutError" ? "انتهت مهلة الاتصال (Timeout > 6s)" : (err.message || "فشل الاتصال بالخادم"),
+    };
+  }
+}
+
+// POST /api/admin/servers/:id/ping - فحص فوري ومباشر لسيرفر محدد
+adminRoutes.post("/servers/:id/ping", async (c) => {
+  try {
+    const id = c.req.param("id");
+    const server = await prisma.server.findUnique({ where: { id } });
+
+    if (!server) {
+      return sendError(c, "NOT_FOUND", "السيرفر المطلوب غير موجود", 404);
+    }
+
+    const result = await testServerConnectivity(server.url);
+
+    const updated = await prisma.server.update({
+      where: { id },
+      data: {
+        isWorking: result.isWorking,
+        lastCheckedAt: new Date(),
+      },
+    });
+
+    return sendSuccess(c, {
+      server: updated,
+      ping: result,
+      message: result.isWorking
+        ? `السيرفر سليم ويعمل بكفاءة (زمن الاستجابة: ${result.latencyMs}ms)`
+        : `السيرفر لا يستجيب أو يعاني من عطل (${result.statusText})`,
+    });
+  } catch (error: any) {
+    return sendError(c, "PING_SERVER_ERROR", error.message || "فشل فحص السيرفر", 500);
+  }
+});
+
+// POST /api/admin/servers/health-check - فحص دوري جماعي لجميع سيرفرات حلقة أو المنصة
+adminRoutes.post("/servers/health-check", async (c) => {
+  try {
+    const episodeId = c.req.query("episodeId");
+    const limit = Math.min(30, Math.max(1, parseInt(c.req.query("limit") || "10", 10)));
+
+    const where: any = episodeId ? { episodeId } : {};
+
+    const serversToTest = await prisma.server.findMany({
+      where,
+      orderBy: [{ lastCheckedAt: "asc" }], // prioritize unchecked or least recently checked
+      take: limit,
+    });
+
+    const results = await Promise.all(
+      serversToTest.map(async (srv) => {
+        const check = await testServerConnectivity(srv.url);
+        await prisma.server.update({
+          where: { id: srv.id },
+          data: {
+            isWorking: check.isWorking,
+            lastCheckedAt: new Date(),
+          },
+        }).catch(() => {});
+
+        return {
+          id: srv.id,
+          name: srv.name,
+          url: srv.url,
+          isWorking: check.isWorking,
+          latencyMs: check.latencyMs,
+          statusText: check.statusText,
+        };
+      })
+    );
+
+    const totalHealthy = results.filter((r) => r.isWorking).length;
+    const totalFailed = results.length - totalHealthy;
+
+    return sendSuccess(c, {
+      totalTested: results.length,
+      totalHealthy,
+      totalFailed,
+      servers: results,
+    });
+  } catch (error: any) {
+    return sendError(c, "HEALTH_CHECK_ERROR", error.message || "فشل الفحص الشامل للسيرفرات", 500);
+  }
+});
+
+// PATCH /api/admin/episodes/:id/timecodes - ضبط توقيت تخطي شارة البداية والنهاية ومعاينة اللقطات
 adminRoutes.patch("/episodes/:id/timecodes", async (c) => {
   try {
     const id = c.req.param("id");
-    const { introStart, introEnd, outroStart, outroEnd, durationSeconds } = await c.req.json();
+    const { introStart, introEnd, outroStart, outroEnd, durationSeconds, storyboardUrl } = await c.req.json();
 
     const updated = await prisma.episode.update({
       where: { id },
@@ -173,6 +300,7 @@ adminRoutes.patch("/episodes/:id/timecodes", async (c) => {
         outroStart: outroStart !== undefined ? Number(outroStart) : undefined,
         outroEnd: outroEnd !== undefined ? Number(outroEnd) : undefined,
         durationSeconds: durationSeconds !== undefined ? Number(durationSeconds) : undefined,
+        storyboardUrl: storyboardUrl !== undefined ? (storyboardUrl ? String(storyboardUrl) : null) : undefined,
       },
       select: {
         id: true,
@@ -183,15 +311,151 @@ adminRoutes.patch("/episodes/:id/timecodes", async (c) => {
         outroStart: true,
         outroEnd: true,
         durationSeconds: true,
+        storyboardUrl: true,
       },
     });
 
     return sendSuccess(c, {
       episode: updated,
-      message: "تم تحديث توقيتات تخطي الشارات بنجاح",
+      message: "تم تحديث توقيتات تخطي الشارات وشريط المعاينة بنجاح",
     });
   } catch (error: any) {
     return sendError(c, "TIMECODE_ERROR", error.message || "فشل تحديث توقيتات الشارات", 500);
+  }
+});
+
+// ==========================================
+// Subtitles Management (Soft Subtitles WebVTT)
+// ==========================================
+
+const subtitleSchema = z.object({
+  language: z.string().min(1, "رمز اللغة مطلوب (مثل: ar, en)"),
+  label: z.string().min(1, "اسم الترجمة مطلوب للعرض للمستخدم"),
+  url: z.string().url("رابط ملف الترجمة .vtt يجب أن يكون رابطاً صالحاً"),
+  isDefault: z.boolean().optional().default(false),
+});
+
+// GET /api/admin/episodes/:id/subtitles
+adminRoutes.get("/episodes/:id/subtitles", async (c) => {
+  try {
+    const episodeId = c.req.param("id");
+    const subtitles = await prisma.subtitle.findMany({
+      where: { episodeId },
+      orderBy: { isDefault: "desc" },
+    });
+    return sendSuccess(c, subtitles);
+  } catch (error: any) {
+    return sendError(c, "FETCH_SUBTITLES_ERROR", error.message || "فشل جلب ملفات الترجمة", 500);
+  }
+});
+
+// POST /api/admin/episodes/:id/subtitles
+adminRoutes.post("/episodes/:id/subtitles", async (c) => {
+  try {
+    const episodeId = c.req.param("id");
+    const body = await c.req.json();
+    const parsed = subtitleSchema.safeParse(body);
+
+    if (!parsed.success) {
+      return sendError(c, "VALIDATION_ERROR", parsed.error.errors[0]?.message || "بيانات الترجمة غير صالحة", 400);
+    }
+
+    if (parsed.data.isDefault) {
+      // Unset previous defaults for this episode
+      await prisma.subtitle.updateMany({
+        where: { episodeId },
+        data: { isDefault: false },
+      }).catch(() => {});
+    }
+
+    const subtitle = await prisma.subtitle.create({
+      data: {
+        episodeId,
+        ...parsed.data,
+      },
+    });
+
+    return sendSuccess(c, subtitle, undefined, 201);
+  } catch (error: any) {
+    return sendError(c, "CREATE_SUBTITLE_ERROR", error.message || "فشل إضافة ملف الترجمة", 500);
+  }
+});
+
+// DELETE /api/admin/subtitles/:id
+adminRoutes.delete("/subtitles/:id", async (c) => {
+  try {
+    const id = c.req.param("id");
+    await prisma.subtitle.delete({ where: { id } });
+    return sendSuccess(c, { message: "تم حذف ملف الترجمة بنجاح" });
+  } catch (error: any) {
+    return sendError(c, "DELETE_SUBTITLE_ERROR", error.message || "فشل حذف ملف الترجمة", 500);
+  }
+});
+
+// ==========================================
+// Audio Tracks Management (Dual Audio)
+// ==========================================
+
+const audioTrackSchema = z.object({
+  language: z.string().min(1, "رمز اللغة مطلوب (مثل: ar, ja)"),
+  label: z.string().min(1, "اسم المسار الصوتي مطلوب"),
+  url: z.string().url().optional().nullable(),
+  isDefault: z.boolean().optional().default(false),
+});
+
+// GET /api/admin/episodes/:id/audio-tracks
+adminRoutes.get("/episodes/:id/audio-tracks", async (c) => {
+  try {
+    const episodeId = c.req.param("id");
+    const tracks = await prisma.audioTrack.findMany({
+      where: { episodeId },
+      orderBy: { isDefault: "desc" },
+    });
+    return sendSuccess(c, tracks);
+  } catch (error: any) {
+    return sendError(c, "FETCH_AUDIO_TRACKS_ERROR", error.message || "فشل جلب المسارات الصوتية", 500);
+  }
+});
+
+// POST /api/admin/episodes/:id/audio-tracks
+adminRoutes.post("/episodes/:id/audio-tracks", async (c) => {
+  try {
+    const episodeId = c.req.param("id");
+    const body = await c.req.json();
+    const parsed = audioTrackSchema.safeParse(body);
+
+    if (!parsed.success) {
+      return sendError(c, "VALIDATION_ERROR", parsed.error.errors[0]?.message || "بيانات المسار الصوتي غير صالحة", 400);
+    }
+
+    if (parsed.data.isDefault) {
+      await prisma.audioTrack.updateMany({
+        where: { episodeId },
+        data: { isDefault: false },
+      }).catch(() => {});
+    }
+
+    const track = await prisma.audioTrack.create({
+      data: {
+        episodeId,
+        ...parsed.data,
+      },
+    });
+
+    return sendSuccess(c, track, undefined, 201);
+  } catch (error: any) {
+    return sendError(c, "CREATE_AUDIO_TRACK_ERROR", error.message || "فشل إضافة المسار الصوتي", 500);
+  }
+});
+
+// DELETE /api/admin/audio-tracks/:id
+adminRoutes.delete("/audio-tracks/:id", async (c) => {
+  try {
+    const id = c.req.param("id");
+    await prisma.audioTrack.delete({ where: { id } });
+    return sendSuccess(c, { message: "تم حذف المسار الصوتي بنجاح" });
+  } catch (error: any) {
+    return sendError(c, "DELETE_AUDIO_TRACK_ERROR", error.message || "فشل حذف المسار الصوتي", 500);
   }
 });
 
