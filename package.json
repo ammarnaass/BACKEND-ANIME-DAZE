@@ -5,7 +5,7 @@
   "main": "api/index.js",
   "scripts": {
     "dev": "tsx watch src/dev.ts",
-    "build": "prisma generate && esbuild src/index.ts --bundle --platform=node --target=node20 --packages=external --format=cjs --footer:js=\"const { handle } = require('@hono/node-server/vercel'); module.exports = handle(app); module.exports.default = module.exports;\" --outfile=api/index.js",
+    "build": "prisma generate && esbuild src/index.ts --bundle --platform=node --target=node20 --external:@prisma/client --external:@prisma/adapter-pg --external:pg --format=cjs --footer:js=\"const { handle } = require('@hono/node-server/vercel'); module.exports = handle(app); module.exports.default = module.exports;\" --outfile=api/index.js",
     "postinstall": "prisma generate"
   },
   "dependencies": {
