@@ -49,12 +49,29 @@ function formatEpisode(ep: any, fallbackAnimeId?: string) {
     episode_number: Number(epNum),
     seasonNumber: Number(ep.seasonNumber || ep.season_number || 1),
     season_number: Number(ep.seasonNumber || ep.season_number || 1),
-    servers: servers.map((s: any) => ({
-      id: s.id || `srv-${Math.random().toString(36).substring(2, 7)}`,
-      name: s.name,
-      url: s.url,
-      quality: s.quality || "1080p FHD",
-    })),
+    introStart: ep.introStart ?? 0,
+    introEnd: ep.introEnd ?? 90,
+    outroStart: ep.outroStart ?? (ep.durationSeconds ? ep.durationSeconds - 90 : 1320),
+    outroEnd: ep.outroEnd ?? (ep.durationSeconds || 1410),
+    servers: servers.map((s: any, idx: number) => {
+      const url = s.url || "";
+      const lower = url.toLowerCase();
+      let sType = s.type || "hls";
+      if (lower.includes("mega.nz") || lower.includes("mega.io")) sType = "mega";
+      else if (lower.includes(".m3u8")) sType = "hls";
+      else if (lower.includes(".mp4")) sType = "mp4";
+      else if (lower.includes("embed") || lower.includes("iframe") || lower.includes("ok.ru") || lower.includes("vidmoly")) sType = "embed";
+
+      return {
+        id: s.id || `srv-${Math.random().toString(36).substring(2, 7)}`,
+        name: s.name,
+        url: s.url,
+        quality: s.quality || "1080p FHD",
+        type: sType,
+        priority: s.priority || idx + 1,
+        isWorking: s.isWorking !== undefined ? Boolean(s.isWorking) : true,
+      };
+    }),
     createdAt: ep.createdAt ? (typeof ep.createdAt === "string" ? ep.createdAt : ep.createdAt.toISOString()) : new Date().toISOString(),
   };
 }

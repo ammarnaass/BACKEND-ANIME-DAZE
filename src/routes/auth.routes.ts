@@ -5,12 +5,9 @@ import { SignJWT } from "jose";
 import { prisma } from "../lib/prisma";
 import { sendSuccess, sendError } from "../lib/response";
 import { authMiddleware } from "../middleware/auth";
+import { JWT_SECRET_ENCODED } from "../lib/config";
 
 export const authRoutes = new Hono();
-
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || "slam-dunk-super-secret-jwt-key-2026"
-);
 
 async function generateTokens(user: { id: string; email: string; role: string; name: string }) {
   const token = await new SignJWT({
@@ -22,7 +19,7 @@ async function generateTokens(user: { id: string; email: string; role: string; n
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("15m")
-    .sign(JWT_SECRET);
+    .sign(JWT_SECRET_ENCODED);
 
   const refreshToken = crypto.randomBytes(40).toString("hex");
   const refreshTokenHash = crypto.createHash("sha256").update(refreshToken).digest("hex");
@@ -158,10 +155,31 @@ authRoutes.post("/refresh", async (c) => {
       .setProtectedHeader({ alg: "HS256" })
       .setIssuedAt()
       .setExpirationTime("15m")
-      .sign(JWT_SECRET);
+      .sign(JWT_SECRET_ENCODED);
+
+    // Rotate refresh token: revoke current session and issue a fresh one
+    const newRefreshToken = crypto.randomBytes(40).toString("hex");
+    const newRefreshTokenHash = crypto.createHash("sha256").update(newRefreshToken).digest("hex");
+    const newExpiresAt = new Date();
+    newExpiresAt.setDate(newExpiresAt.getDate() + 30);
+
+    await prisma.$transaction([
+      prisma.session.update({
+        where: { id: session.id },
+        data: { revokedAt: new Date() },
+      }),
+      prisma.session.create({
+        data: {
+          userId: session.user.id,
+          refreshTokenHash: newRefreshTokenHash,
+          expiresAt: newExpiresAt,
+        },
+      }),
+    ]);
 
     return sendSuccess(c, {
       token: newToken,
+      refreshToken: newRefreshToken,
       user: {
         id: session.user.id,
         name: session.user.name,

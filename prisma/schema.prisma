@@ -75,28 +75,46 @@ model Anime {
 }
 
 model Episode {
-  id            String   @id
-  animeId       String
-  anime         Anime    @relation(fields: [animeId], references: [id])
-  title         String
-  description   String?
-  thumbnail     String?
-  duration      String?
-  episodeNumber Int      @default(1)
-  seasonNumber  Int      @default(1)
-  createdAt     DateTime @default(now())
+  id              String    @id
+  animeId         String
+  anime           Anime     @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  title           String
+  description     String?
+  thumbnail       String?
+  duration        String?
+  durationSeconds Float?
+  episodeNumber   Int       @default(1)
+  seasonNumber    Int       @default(1)
+  createdAt       DateTime  @default(now())
+
+  // Timecodes for player skip controls
+  introStart      Float?
+  introEnd        Float?
+  outroStart      Float?
+  outroEnd        Float?
   
   // Servers
-  servers     Server[]
+  servers         Server[]
+
+  @@index([animeId])
+  @@index([episodeNumber])
 }
 
 model Server {
-  id        String  @id @default(uuid())
-  episodeId String
-  episode   Episode @relation(fields: [episodeId], references: [id])
-  name      String
-  url       String
-  quality   String?
+  id              String    @id @default(uuid())
+  episodeId       String
+  episode         Episode   @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+  name            String
+  url             String
+  quality         String?
+  type            String    @default("hls") // hls | mp4 | embed | mega
+  priority        Int       @default(1)     // 1 = primary, 2 = secondary, etc.
+  isWorking       Boolean   @default(true)
+  lastCheckedAt   DateTime?
+
+  @@index([episodeId])
+  @@index([isWorking])
+  @@index([priority])
 }
 
 model Review {
@@ -165,6 +183,9 @@ model Character {
   animeId     String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@index([animeId])
+  @@index([team])
 }
 
 model Session {
@@ -241,4 +262,6 @@ model Report {
   createdAt  DateTime @default(now())
 
   @@index([status])
+  @@index([targetId])
+  @@index([targetType])
 }

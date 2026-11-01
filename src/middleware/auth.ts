@@ -1,6 +1,7 @@
 import { Context, Next } from "hono";
 import { jwtVerify } from "jose";
 import { sendError } from "../lib/response";
+import { JWT_SECRET_ENCODED } from "../lib/config";
 
 export interface AuthenticatedUser {
   userId: string;
@@ -14,10 +15,6 @@ declare module "hono" {
     user: AuthenticatedUser;
   }
 }
-
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || "slam-dunk-super-secret-jwt-key-2026"
-);
 
 export async function optionalAuthMiddleware(c: Context, next: Next) {
   const authHeader = c.req.header("Authorization");
@@ -36,7 +33,7 @@ export async function optionalAuthMiddleware(c: Context, next: Next) {
 
   if (token) {
     try {
-      const { payload } = await jwtVerify(token, JWT_SECRET);
+      const { payload } = await jwtVerify(token, JWT_SECRET_ENCODED);
       c.set("user", {
         userId: (payload.userId || payload.sub || payload.id) as string,
         email: payload.email as string,

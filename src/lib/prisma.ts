@@ -20,12 +20,13 @@ if (!connectionString) {
 }
 
 const isLocal = connectionString.includes("localhost") || connectionString.includes("127.0.0.1");
+const isServerless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.NODE_ENV === "production");
 
 const pool = new pg.Pool({
   connectionString: connectionString || undefined,
   ssl: isLocal ? false : { rejectUnauthorized: false },
-  max: 10,
-  idleTimeoutMillis: 30000,
+  max: isServerless ? (Number(process.env.PG_POOL_MAX) || 2) : 10,
+  idleTimeoutMillis: isServerless ? 10000 : 30000,
   connectionTimeoutMillis: 5000,
 });
 
