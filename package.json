@@ -2,10 +2,10 @@
   "name": "slam-dunk-backend-hono",
   "version": "1.0.0",
   "description": "Standalone Hono.js Backend for ANIME DAZE / Slam Dunk Platform on Vercel",
-  "main": "api/index.ts",
+  "main": "api/index.js",
   "scripts": {
     "dev": "tsx watch src/dev.ts",
-    "build": "prisma generate",
+    "build": "prisma generate && esbuild src/index.ts --bundle --platform=node --target=node20 --packages=external --format=cjs --footer:js=\"const { handle } = require('@hono/node-server/vercel'); module.exports = handle(app); module.exports.default = module.exports;\" --outfile=api/index.js",
     "postinstall": "prisma generate"
   },
   "dependencies": {
@@ -16,6 +16,7 @@
     "@types/pg": "^8.23.1",
     "bcryptjs": "^3.0.3",
     "dotenv": "^18.0.9",
+    "esbuild": "^0.25.0",
     "google-auth-library": "^10.5.0",
     "hono": "^4.7.2",
     "jose": "^6.1.3",
