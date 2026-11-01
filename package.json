@@ -1,0 +1,32 @@
+{
+  "name": "slam-dunk-backend-hono",
+  "version": "1.0.0",
+  "description": "Standalone Hono.js Backend for ANIME DAZE / Slam Dunk Platform on Vercel",
+  "main": "api/index.ts",
+  "scripts": {
+    "dev": "tsx watch src/dev.ts",
+    "build": "prisma generate",
+    "postinstall": "prisma generate"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.13.8",
+    "@hono/zod-validator": "^0.4.3",
+    "@prisma/adapter-pg": "^7.10.1",
+    "@prisma/client": "^7.2.0",
+    "@types/pg": "^8.23.1",
+    "bcryptjs": "^3.0.3",
+    "dotenv": "^18.0.9",
+    "google-auth-library": "^10.5.0",
+    "hono": "^4.7.2",
+    "jose": "^6.1.3",
+    "pg": "^8.23.1",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^20.17.0",
+    "prisma": "^7.2.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.7.0"
+  }
+}

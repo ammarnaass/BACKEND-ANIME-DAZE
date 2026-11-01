@@ -1,0 +1,90 @@
+import { Hono } from "hono";
+import { cors } from "hono/cors";
+import { logger } from "hono/logger";
+import { prettyJSON } from "hono/pretty-json";
+import { sendError } from "./lib/response";
+
+import { authRoutes } from "./routes/auth.routes";
+import { sessionsRoutes } from "./routes/sessions.routes";
+import { animesRoutes } from "./routes/animes.routes";
+import { charactersRoutes } from "./routes/characters.routes";
+import { episodesRoutes } from "./routes/episodes.routes";
+import { meRoutes } from "./routes/me.routes";
+import { mobileRoutes } from "./routes/mobile.routes";
+import { adminRoutes } from "./routes/admin.routes";
+import { planetsRoutes } from "./routes/planets.routes";
+
+export const app = new Hono();
+
+// Global Middlewares
+app.use("*", logger());
+app.use("*", prettyJSON());
+
+// CORS Configuration for Next.js PWA & Mobile App
+app.use(
+  "*",
+  cors({
+    origin: (origin) => {
+      // Allow localhost, mobile app headers (null/empty), Vercel previews, and production domains
+      if (
+        !origin ||
+        origin.includes("localhost") ||
+        origin.includes("127.0.0.1") ||
+        origin.endsWith(".vercel.app") ||
+        origin === "https://slam-dunk-w.vercel.app"
+      ) {
+        return origin || "*";
+      }
+      return "https://slam-dunk-w.vercel.app";
+    },
+    credentials: true,
+    allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept"],
+    exposeHeaders: ["Content-Length", "X-Kuma-Revision"],
+    maxAge: 600,
+  })
+);
+
+// Health Check Endpoint
+app.get("/health", (c) => {
+  return c.json({
+    status: "ok",
+    service: "ANIME DAZE / Slam Dunk Hono Backend",
+    engine: "Hono.js on Vercel Serverless",
+    timestamp: new Date().toISOString(),
+    version: "2.5.0",
+  });
+});
+
+app.get("/", (c) => {
+  return c.json({
+    message: "Welcome to ANIME DAZE Standalone API Gateway",
+    documentation: "/api/v1/animes",
+    health: "/health",
+  });
+});
+
+// Mount Routes
+app.route("/api/v1/auth/sessions", sessionsRoutes);
+app.route("/api/v1/auth", authRoutes);
+app.route("/api/v1/animes", animesRoutes);
+app.route("/api/v1/characters", charactersRoutes);
+app.route("/api/v1/episodes", episodesRoutes);
+app.route("/api/v1/me", meRoutes);
+app.route("/api/v1/planets", planetsRoutes);
+app.route("/api/planets", planetsRoutes);
+app.route("/api/mobile/v1", mobileRoutes);
+app.route("/api/admin", adminRoutes);
+
+// 404 Handler
+app.notFound((c) => {
+  return sendError(c, "NOT_FOUND", `المسار المطلوب غير موجود: ${c.req.method} ${c.req.path}`, 404);
+});
+
+// Centralized Error Handler
+app.onError((err, c) => {
+  console.error("Hono Application Error:", err);
+  return sendError(c, "INTERNAL_SERVER_ERROR", err.message || "حدث خطأ غير متوقع في خادم الـ API", 500);
+});
+
+export default app;
