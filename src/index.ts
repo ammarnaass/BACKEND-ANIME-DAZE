@@ -58,13 +58,45 @@ app.get("/health", (c) => {
 
 app.get("/", (c) => {
   return c.json({
+    status: "ok",
     message: "Welcome to ANIME DAZE Standalone API Gateway",
     documentation: "/api/v1/animes",
     health: "/health",
+    version: "2.5.0",
   });
 });
 
 app.get("/api", (c) => {
+  return c.json({
+    status: "ok",
+    service: "ANIME DAZE / Slam Dunk Hono Backend",
+    engine: "Hono.js on Vercel Serverless",
+    timestamp: new Date().toISOString(),
+    version: "2.5.0",
+  });
+});
+
+app.get("/api/", (c) => {
+  return c.json({
+    status: "ok",
+    service: "ANIME DAZE / Slam Dunk Hono Backend",
+    engine: "Hono.js on Vercel Serverless",
+    timestamp: new Date().toISOString(),
+    version: "2.5.0",
+  });
+});
+
+app.get("/api/index", (c) => {
+  return c.json({
+    status: "ok",
+    service: "ANIME DAZE / Slam Dunk Hono Backend",
+    engine: "Hono.js on Vercel Serverless",
+    timestamp: new Date().toISOString(),
+    version: "2.5.0",
+  });
+});
+
+app.get("/api/index.js", (c) => {
   return c.json({
     status: "ok",
     service: "ANIME DAZE / Slam Dunk Hono Backend",
